@@ -83,7 +83,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body className="antialiased min-h-screen flex flex-col">
+      <body className="antialiased min-h-screen flex flex-col" suppressHydrationWarning>
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=G-8QPSRLQD06"
