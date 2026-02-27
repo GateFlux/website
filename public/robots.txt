@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gateflux.com/sitemap.xml
+
+# Block admin and API paths
+Disallow: /admin/
+Disallow: /api/

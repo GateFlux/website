@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary-900 ring-offset-2;
+  }
+}
+
+@layer components {
+  /* Section spacing */
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+
+  /* Button base shared styles */
+  .btn-base {
+    @apply inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  /* Primary button — medium (used in Header) */
+  .btn-primary {
+    @apply btn-base px-6 py-3 text-base bg-accent-500 text-white hover:bg-accent-600 focus:ring-accent-500 shadow-soft hover:shadow-enterprise;
+  }
+
+  /* Primary button — large (used in hero/CTA sections) */
+  .btn-primary-lg {
+    @apply btn-base px-8 py-4 text-lg bg-accent-500 text-white hover:bg-accent-600 focus:ring-accent-500 shadow-soft hover:shadow-enterprise;
+  }
+
+  /* Outline button for dark backgrounds */
+  .btn-outline {
+    @apply btn-base text-white border-2 border-white/30 hover:border-white hover:bg-white/10 focus:ring-white;
+  }
+
+  /* Secondary button for light backgrounds */
+  .btn-secondary {
+    @apply btn-base px-6 py-3 text-base bg-white text-primary-900 border-2 border-primary-200 hover:border-primary-900 hover:bg-primary-50 focus:ring-primary-500;
+  }
+
+  /* Grid pattern overlay for dark hero/CTA sections */
+  .bg-grid-pattern-dark {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+}
