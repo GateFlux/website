@@ -1,11 +1,12 @@
 import Link from 'next/link'
-import { Mail, Phone, MapPin, Linkedin, Twitter, Facebook, Instagram } from 'lucide-react'
+import { Mail, Phone, MapPin, Linkedin, Twitter, Facebook, Instagram, Lock, ShieldCheck, FileCheck, Server } from 'lucide-react'
 import Logo from './Logo'
 import Container from './Container'
 
 const footerLinks = {
   product: [
     { name: 'Features', href: '/features' },
+    { name: 'Modules', href: '/modules' },
     { name: 'Security', href: '/security' },
     { name: 'Pricing', href: '/pricing' },
     { name: 'Integrations', href: '/features#integrations' },
@@ -17,16 +18,20 @@ const footerLinks = {
     { name: 'Partners', href: '/about#partners' },
   ],
   resources: [
-    { name: 'Blog', href: '/blog' },
-    { name: 'Documentation', href: '/docs' },
-    { name: 'Help Center', href: '/help' },
-    { name: 'API Reference', href: '/api' },
+    { name: 'Documentation', href: 'https://docs.gateflux.co', external: true },
+    { name: 'User Guides', href: '/user-guides' },
+    { name: 'Contact Support', href: '/contact' },
   ],
   legal: [
+    { name: 'Terms of Use', href: '/terms' },
     { name: 'Privacy Policy', href: '/privacy' },
-    { name: 'Terms of Service', href: '/terms' },
     { name: 'Cookie Policy', href: '/cookies' },
-    { name: 'GDPR', href: '/gdpr' },
+    { name: 'Cancellation & Refund', href: '/refund-policy' },
+    { name: 'Data Deletion', href: '/data-deletion' },
+  ],
+  trust: [
+    { name: 'Security & Compliance', href: '/security' },
+    { name: 'Service Level Agreement', href: '/sla' },
   ],
 }
 
@@ -42,7 +47,7 @@ export default function Footer() {
     <footer className="bg-primary-900 text-white">
       {/* Main Footer */}
       <Container className="py-16 md:py-20">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-8 lg:gap-10">
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <Logo variant="light" className="h-10 w-auto" />
@@ -112,12 +117,23 @@ export default function Footer() {
             <ul className="mt-4 space-y-3">
               {footerLinks.resources.map((item) => (
                 <li key={item.name}>
-                  <Link
-                    href={item.href}
-                    className="text-primary-300 hover:text-accent-400 text-sm transition-colors duration-200"
-                  >
-                    {item.name}
-                  </Link>
+                  {item.external ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary-300 hover:text-accent-400 text-sm transition-colors duration-200"
+                    >
+                      {item.name}
+                    </a>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className="text-primary-300 hover:text-accent-400 text-sm transition-colors duration-200"
+                    >
+                      {item.name}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -130,6 +146,25 @@ export default function Footer() {
             </h3>
             <ul className="mt-4 space-y-3">
               {footerLinks.legal.map((item) => (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    className="text-primary-300 hover:text-accent-400 text-sm transition-colors duration-200"
+                  >
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Trust & Security */}
+          <div>
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
+              Trust
+            </h3>
+            <ul className="mt-4 space-y-3">
+              {footerLinks.trust.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
@@ -181,12 +216,36 @@ export default function Footer() {
         </div>
       </Container>
 
+      {/* Compliance Badges */}
+      <div className="border-t border-primary-800">
+        <Container className="py-5">
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+            {[
+              { icon: Lock,       label: 'SSL Encrypted' },
+              { icon: ShieldCheck, label: 'SOC 2 Ready' },
+              { icon: FileCheck,   label: 'GDPR Compliant' },
+              { icon: FileCheck,   label: 'DPDP Compliant' },
+              { icon: Server,      label: '99.9% Uptime' },
+            ].map(({ icon: Icon, label }) => (
+              <Link
+                key={label}
+                href="/security"
+                className="flex items-center gap-2 text-primary-400 hover:text-primary-200 transition-colors text-sm"
+              >
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                <span>{label}</span>
+              </Link>
+            ))}
+          </div>
+        </Container>
+      </div>
+
       {/* Bottom Bar */}
       <div className="border-t border-primary-800">
-        <Container className="py-6">
+        <Container className="py-5">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-primary-400 text-sm">
-              © {new Date().getFullYear()} GateFlux. All rights reserved.
+              © {new Date().getFullYear()} GateFlux Pvt. Ltd. All rights reserved.
             </p>
             <p className="text-primary-500 text-sm">
               Built with security and scale in mind.

@@ -9,6 +9,7 @@ import Container from './Container'
 
 const navigation = [
   { name: 'Features', href: '/features' },
+  { name: 'Modules', href: '/modules' },
   { name: 'Security', href: '/security' },
   { name: 'Pricing', href: '/pricing' },
   { name: 'About', href: '/about' },
@@ -24,6 +25,7 @@ export default function Header() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20)
     }
+    handleScroll()
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])

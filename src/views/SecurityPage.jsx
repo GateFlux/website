@@ -55,6 +55,7 @@ function TrustBadges() {
     { label: 'SSL Encrypted', icon: Lock },
     { label: 'SOC 2 Ready', icon: ShieldCheck },
     { label: 'GDPR Compliant', icon: FileCheck },
+    { label: 'DPDP Act 2023', icon: FileCheck },
     { label: '99.9% Uptime', icon: Server },
   ]
 
@@ -181,54 +182,291 @@ function SecurityFeaturesSection() {
   )
 }
 
-// Compliance Section
+// Compliance Section — SOC 2 + GDPR
 function ComplianceSection() {
-  const compliances = [
+  const soc2Criteria = [
     {
-      icon: FileCheck,
-      title: 'Data Privacy Requirements',
-      description: 'Full compliance with data protection and privacy requirements for residential communities.',
+      code: 'CC6',
+      name: 'Logical & Physical Access',
+      description: 'Granular RBAC with capability-based permissions per role. TOTP two-factor authentication enforced for admin accounts. Secure cookies, CSRF tokens, and 30-minute idle session timeout.',
+      status: 'implemented',
     },
     {
-      icon: ShieldCheck,
-      title: 'Financial Audit Compliance',
-      description: 'Architecture designed to support financial audit requirements with complete audit trails.',
+      code: 'CC7',
+      name: 'System Monitoring',
+      description: 'Immutable audit logs with SHA-256 checksums covering all critical actions. Structured logging via Loki/Elasticsearch with Slack and Sentry alerting. 90-day security-channel retention.',
+      status: 'implemented',
     },
     {
-      icon: FileText,
-      title: 'Multi-Community Data Isolation',
-      description: 'Each community operates in logically isolated environments with no data mixing.',
+      code: 'CC8',
+      name: 'Change Management',
+      description: 'Deployments follow a structured pipeline with code review, staging validation, and release notes before production rollout.',
+      status: 'implemented',
     },
     {
-      icon: Globe,
-      title: 'Infrastructure-Grade Design',
-      description: 'GateFlux is built as operational infrastructure, not just an application.',
+      code: 'A1',
+      name: 'Availability',
+      description: '99.9% uptime SLA backed by redundant cloud infrastructure, automated failover, and 24/7 health monitoring across database, Redis, queue, and storage layers.',
+      status: 'implemented',
+    },
+    {
+      code: 'C1',
+      name: 'Confidentiality',
+      description: 'Secrets encrypted with AES-256-CBC. Passwords hashed with bcrypt. Tenant data isolated per-database — cross-community access is architecturally impossible.',
+      status: 'implemented',
+    },
+    {
+      code: 'P1–P8',
+      name: 'Privacy',
+      description: 'Audit log retention by action severity (1–3 years). Data minimisation enforced in collection. Soft-delete with anonymisation workflow in progress for full Art. 17 compliance.',
+      status: 'in-progress',
+    },
+  ]
+
+  const gdprArticles = [
+    {
+      article: 'Art. 5',
+      title: 'Data Minimisation',
+      description: 'Only data necessary for community operations is collected. Sensitive fields (passwords, 2FA secrets) are masked in audit trails. No third-party data sharing for advertising.',
+    },
+    {
+      article: 'Art. 6',
+      title: 'Lawful Basis',
+      description: 'Processing based on contractual necessity (community membership agreement) and legitimate interest (gate security, visitor management, financial billing).',
+    },
+    {
+      article: 'Art. 13',
+      title: 'Transparency',
+      description: 'Privacy policy disclosed at onboarding covering what data is collected, how it is used, retention periods, and who can access it.',
+    },
+    {
+      article: 'Art. 17',
+      title: 'Right to Erasure',
+      description: 'Soft-delete with personal data anonymisation workflow for departed residents. Audit log entries for compliance are preserved but personal identifiers are removed on request.',
+    },
+    {
+      article: 'Art. 20',
+      title: 'Data Portability',
+      description: 'Authorized admins can export resident profiles, visitor history, complaints, and financial records in JSON/CSV formats on request.',
+    },
+    {
+      article: 'Art. 32',
+      title: 'Security of Processing',
+      description: 'AES-256-CBC encryption for secrets, bcrypt-hashed passwords, OWASP security headers, rate limiting, input sanitisation, and immutable audit logs with checksum verification.',
     },
   ]
 
   return (
-    <section className="section-padding bg-primary-900">
-      <Container>
-        <SectionHeader
-          badge="Compliance"
-          title="Compliance-Ready Architecture"
-          subtitle="GateFlux is designed to meet stringent regulatory requirements, making compliance audits simpler for your community."
-          light={true}
-        />
-
-        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {compliances.map((compliance) => (
-            <div
-              key={compliance.title}
-              className="bg-primary-800 rounded-lg p-5 border border-primary-700"
-            >
-              <div className="w-10 h-10 rounded-lg bg-primary-700 flex items-center justify-center mb-4">
-                <compliance.icon className="h-5 w-5 text-primary-200" />
-              </div>
-              <h3 className="text-base font-semibold text-white mb-2">{compliance.title}</h3>
-              <p className="text-primary-300 text-sm">{compliance.description}</p>
+    <>
+      {/* SOC 2 Section */}
+      <section className="section-padding bg-primary-900">
+        <Container>
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded text-sm font-medium bg-white/5 border border-white/10 text-white mb-5">
+                <ShieldCheck className="h-4 w-4 text-green-400" />
+                SOC 2 Type II Ready
+              </span>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight">
+                SOC 2 Trust Service Criteria
+              </h2>
+              <p className="text-primary-300 max-w-2xl mx-auto">
+                GateFlux is architected around the AICPA SOC 2 framework. Our controls address
+                all five Trust Service Criteria relevant to residential management platforms.
+              </p>
             </div>
-          ))}
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {soc2Criteria.map((item) => (
+                <div key={item.code} className="bg-primary-800 rounded-lg p-5 border border-primary-700">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <span className="text-xs font-bold text-primary-400 font-mono">{item.code}</span>
+                      <h3 className="text-base font-semibold text-white mt-0.5">{item.name}</h3>
+                    </div>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${
+                      item.status === 'implemented'
+                        ? 'bg-green-500/20 text-green-400'
+                        : 'bg-yellow-500/20 text-yellow-400'
+                    }`}>
+                      {item.status === 'implemented' ? '✓ Implemented' : '↻ In Progress'}
+                    </span>
+                  </div>
+                  <p className="text-primary-300 text-sm leading-relaxed">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* GDPR Section */}
+      <section className="section-padding bg-white">
+        <Container>
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded text-sm font-medium bg-primary-50 border border-primary-100 text-primary-700 mb-5">
+                <FileCheck className="h-4 w-4 text-primary-600" />
+                GDPR Compliant
+              </span>
+              <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-4 tracking-tight">
+                GDPR Data Protection Compliance
+              </h2>
+              <p className="text-primary-600 max-w-2xl mx-auto">
+                GateFlux processes personal data of residents, visitors, and staff in accordance with
+                GDPR principles — transparency, minimisation, and individual rights.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {gdprArticles.map((item) => (
+                <div key={item.article} className="bg-neutral-50 rounded-lg p-5 border border-primary-100">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-xs font-bold text-primary-500 font-mono bg-primary-100 px-2 py-0.5 rounded">
+                      {item.article}
+                    </span>
+                    <h3 className="text-sm font-semibold text-primary-900">{item.title}</h3>
+                  </div>
+                  <p className="text-primary-600 text-sm leading-relaxed">{item.description}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 bg-primary-50 rounded-lg p-5 border border-primary-100 flex items-start gap-4">
+              <FileText className="h-5 w-5 text-primary-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-primary-900 mb-1">Data Processing Agreement (DPA)</p>
+                <p className="text-sm text-primary-600">
+                  Enterprise customers can request a signed DPA covering sub-processor lists, data retention schedules,
+                  breach notification obligations, and standard contractual clauses (SCCs) for cross-border transfers.
+                </p>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+    </>
+  )
+}
+
+// DPDP Section
+function DpdpSection() {
+  const sections = [
+    {
+      section: 'S.4 / S.6',
+      title: 'Consent & Lawful Basis',
+      status: 'implemented',
+      description: 'Residents provide explicit, informed consent at onboarding. Consent is specific to purpose (gate security, billing, governance). Withdrawal triggers the S.12 erasure workflow.',
+    },
+    {
+      section: 'S.5',
+      title: 'Notice to Data Principal',
+      status: 'implemented',
+      description: 'Privacy notice at registration covers data categories, purpose, retention period, and how to exercise rights — available in English and Hindi.',
+    },
+    {
+      section: 'S.8',
+      title: 'Data Fiduciary Obligations',
+      status: 'implemented',
+      description: 'GateFlux maintains data accuracy, implements security safeguards, and deletes personal data once purpose is fulfilled or consent withdrawn (resident offboarding workflow).',
+    },
+    {
+      section: 'S.9',
+      title: "Children's Data",
+      status: 'implemented',
+      description: 'Accounts for users under 18 require parental/guardian consent before activation. Behavioural profiling is disabled for minors.',
+    },
+    {
+      section: 'S.11 / S.12',
+      title: 'Rights of Data Principal',
+      status: 'implemented',
+      description: 'Data principals can request a full personal data export (S.11) and submit erasure requests (S.12) directly from the app. Requests are processed within 30 days.',
+    },
+    {
+      section: 'S.13',
+      title: 'Grievance Redressal',
+      status: 'implemented',
+      description: 'Designated Grievance Officer reachable at privacy@gateflux.co. Grievances acknowledged within 48 hours and resolved within 30 days.',
+    },
+    {
+      section: 'S.8(6)',
+      title: 'Breach Notification',
+      status: 'implemented',
+      description: 'Data breaches are reported to the Data Protection Board of India (DPBI) within 72 hours, and affected Data Principals are notified without undue delay.',
+    },
+    {
+      section: 'S.8(7)',
+      title: 'Data Retention & Deletion',
+      status: 'implemented',
+      description: 'Personal data retained only for its stated purpose. Automated retention schedules enforce deletion. Audit records follow regulatory retention periods.',
+    },
+    {
+      section: 'S.14',
+      title: 'Right to Nominate',
+      status: 'in-progress',
+      description: 'Residents will be able to designate a nominee to exercise data rights on their behalf after death or incapacity — currently in development.',
+    },
+  ]
+
+  return (
+    <section className="section-padding bg-neutral-50">
+      <Container>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded text-sm font-medium bg-primary-50 border border-primary-100 text-primary-700 mb-5">
+              <ShieldCheck className="h-4 w-4 text-primary-600" />
+              DPDP Act 2023 — India
+            </span>
+            <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-4 tracking-tight">
+              Digital Personal Data Protection Act Compliance
+            </h2>
+            <p className="text-primary-600 max-w-2xl mx-auto">
+              GateFlux is purpose-built for Indian residential communities. As a Data Processor,
+              GateFlux supports society committees (Data Fiduciaries) in fulfilling their
+              obligations under India's DPDP Act, 2023.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {sections.map((item) => (
+              <div key={item.section} className="bg-white rounded-lg p-5 border border-primary-100">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <span className="text-xs font-bold text-primary-500 font-mono bg-primary-50 px-2 py-0.5 rounded">
+                      {item.section}
+                    </span>
+                    <h3 className="text-sm font-semibold text-primary-900 mt-1">{item.title}</h3>
+                  </div>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ml-2 mt-0.5 ${
+                    item.status === 'implemented'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {item.status === 'implemented' ? '✓' : '↻'}
+                  </span>
+                </div>
+                <p className="text-primary-600 text-sm leading-relaxed">{item.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-primary-900 rounded-xl p-6 text-white">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <p className="font-semibold mb-1">Grievance Officer — DPDP Act 2023</p>
+                <p className="text-primary-300 text-sm">
+                  Residents and data principals can raise grievances with our designated officer.
+                  Responses within 48 hours · Resolution within 30 days.
+                </p>
+              </div>
+              <a
+                href="mailto:privacy@gateflux.co"
+                className="flex-shrink-0 inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
+              >
+                privacy@gateflux.co
+              </a>
+            </div>
+          </div>
         </div>
       </Container>
     </section>
@@ -487,6 +725,7 @@ export default function SecurityPage() {
       <TrustBadges />
       <SecurityFeaturesSection />
       <ComplianceSection />
+      <DpdpSection />
       <InfrastructureSection />
       <AccessControlSection />
       <SecurityPracticesSection />

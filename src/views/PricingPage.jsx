@@ -1,6 +1,8 @@
+import { Fragment } from 'react'
 import Link from 'next/link'
 import {
   Check,
+  Minus,
   ArrowRight,
   Download,
   Calendar,
@@ -117,45 +119,69 @@ function PhilosophySection() {
 }
 
 // Plan Card Component
-function PlanCard({ plan, highlighted = false }) {
+function PlanCard({ plan }) {
+  const isEnterprise = plan.priceMonthly === null
+  const yearlySaving = plan.priceMonthly
+    ? Math.round(((plan.priceMonthly * 12 - plan.priceYearly) / (plan.priceMonthly * 12)) * 100)
+    : 0
+
   return (
     <div
       className={`relative rounded-xl p-6 flex flex-col h-full ${
-        highlighted
-          ? 'bg-white border-2 border-accent-500'
+        plan.highlighted
+          ? 'bg-white border-2 border-accent-500 shadow-lg'
           : 'bg-white border border-primary-200'
       }`}
     >
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-3">
+      {plan.highlighted && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+          <span className="bg-accent-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+            Most Popular
+          </span>
+        </div>
+      )}
+
+      <div className="mb-5">
+        <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center">
             <plan.icon className="h-5 w-5 text-primary-700" />
           </div>
           <h3 className="text-xl font-bold text-primary-900">{plan.name}</h3>
         </div>
-        <p className="text-primary-600 text-sm mb-4">{plan.tagline}</p>
-        
-        <div className="space-y-2 text-sm text-primary-700 mb-4">
-          <p><span className="font-medium">Best For:</span> {plan.bestFor}</p>
-          <p><span className="font-medium">Minimum Billing:</span> {plan.minimumUnits} units</p>
-        </div>
+        <p className="text-primary-600 text-sm">{plan.tagline}</p>
       </div>
 
-      <div className="mb-6 pb-6 border-b border-primary-100">
-        <div className="mb-2">
-          <span className="text-2xl font-bold text-primary-900">₹{plan.pricePerUnit.toLocaleString()}</span>
-          <span className="text-primary-600 text-sm"> per flat per year</span>
-        </div>
-        <p className="text-sm text-primary-500">
-          Minimum Annual Billing: ₹{plan.minimumBilling.toLocaleString()}
-        </p>
-        {plan.example && (
-          <p className="text-sm text-primary-500 mt-1">
-            Example: {plan.example}
-          </p>
+      <div className="mb-5 pb-5 border-b border-primary-100">
+        {isEnterprise ? (
+          <div>
+            <p className="text-2xl font-bold text-primary-900 mb-1">Custom Pricing</p>
+            <p className="text-sm text-primary-500">Unlimited units & users</p>
+          </div>
+        ) : (
+          <div>
+            <div className="flex items-end gap-1 mb-1">
+              <span className="text-3xl font-bold text-primary-900">
+                ₹{plan.priceMonthly.toLocaleString('en-IN')}
+              </span>
+              <span className="text-primary-500 text-sm mb-1">/month</span>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-primary-600">
+                ₹{plan.priceYearly.toLocaleString('en-IN')}/year
+              </span>
+              {yearlySaving > 0 && (
+                <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                  Save {yearlySaving}% annually
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-primary-500 mt-2">
+              Up to {plan.maxUnits.toLocaleString('en-IN')} units · {plan.maxUsers.toLocaleString('en-IN')} users
+            </p>
+          </div>
         )}
         <p className="text-sm text-primary-500 mt-2">
-          Setup Fee: ₹{plan.setupFee}
+          {plan.trialDays}-day free trial included
         </p>
       </div>
 
@@ -176,7 +202,7 @@ function PlanCard({ plan, highlighted = false }) {
       <Link
         href="/contact"
         className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-sm transition-colors ${
-          highlighted
+          plan.highlighted
             ? 'bg-accent-500 text-white hover:bg-accent-600'
             : 'bg-primary-900 text-white hover:bg-primary-800'
         }`}
@@ -191,68 +217,95 @@ function PlanCard({ plan, highlighted = false }) {
 function PlansSection() {
   const plans = [
     {
-      name: 'Core',
+      name: 'Starter',
+      slug: 'basic',
       icon: Building2,
-      tagline: 'Structured Essentials for Growing Communities',
-      bestFor: 'Up to 150 units',
-      minimumUnits: 100,
-      pricePerUnit: 1350,
-      minimumBilling: 135000,
-      setupFee: '25,000 (one-time)',
+      tagline: 'Perfect for small societies getting started',
+      priceMonthly: 1999,
+      priceYearly: 19190,
+      maxUnits: 50,
+      maxUsers: 150,
+      trialDays: 14,
       features: [
-        'Visitor Management',
-        'Security App',
+        'Visitor Management & Check-in/out',
+        'QR Code Entry System',
+        'Notices & Announcements',
         'Complaint Management',
-        'Maintenance Billing',
-        'Online Payments',
-        'Standard Reports',
-        'Role-Based Access',
+        'Security Guard App',
+        'Role-Based Access Control',
+        'Basic Reports',
       ],
-      cta: 'Request Quote',
+      cta: 'Start Free Trial',
+      highlighted: false,
+    },
+    {
+      name: 'Essential',
+      slug: 'standard',
+      icon: Users,
+      tagline: 'Everything you need for a well-run society',
+      priceMonthly: 5000,
+      priceYearly: 48000,
+      maxUnits: 500,
+      maxUsers: 1500,
+      trialDays: 14,
+      includesLabel: 'Everything in Starter, plus',
+      features: [
+        'Maintenance Billing & Online Payments',
+        'Amenity Booking & Management',
+        'Staff & Shift Management',
+        'Package / Parcel Tracking',
+        'Vehicle Registration & Verification',
+        'Recurring Visitor Management',
+        'Vendor Management',
+      ],
+      cta: 'Start Free Trial',
+      highlighted: false,
     },
     {
       name: 'Professional',
-      icon: Users,
-      tagline: 'Governance-Ready Community Operations',
-      bestFor: '150–500 units',
-      minimumUnits: 150,
-      pricePerUnit: 1950,
-      minimumBilling: 292500,
-      example: '300 units → ₹5,85,000 annually',
-      setupFee: '50,000–75,000',
-      includesLabel: 'Everything in Core, plus',
+      slug: 'professional',
+      icon: Landmark,
+      tagline: 'Advanced tools for large communities',
+      priceMonthly: 12000,
+      priceYearly: 115200,
+      maxUnits: 2000,
+      maxUsers: 6000,
+      trialDays: 14,
+      includesLabel: 'Everything in Essential, plus',
       features: [
-        'QR Entry System',
-        'Domestic Help Registry',
-        'Polls & Voting',
-        'Vendor Management',
-        'Advanced Reports',
-        'Audit Logs',
-        'Multi-Tower Support',
+        'Work Orders & Maintenance Tracking',
+        'Advanced Analytics & Dashboards',
+        'Society Accounting',
+        'Community Features (Events, Polls)',
+        'Governance & Board Elections',
+        'Two-Factor Authentication (2FA)',
+        'Audit Logs & Activity Tracking',
       ],
-      cta: 'Schedule Consultation',
+      cta: 'Start Free Trial',
       highlighted: true,
     },
     {
       name: 'Enterprise',
-      icon: Landmark,
-      tagline: 'Infrastructure-Grade Control for Large Complexes',
-      bestFor: '500+ units, Builders & Multi-Property Operators',
-      minimumUnits: 500,
-      pricePerUnit: 2950,
-      minimumBilling: 1475000,
-      example: '800 units → ₹23,60,000 annually',
-      setupFee: '1,00,000–2,50,000',
+      slug: 'enterprise',
+      icon: Server,
+      tagline: 'Unlimited power for property management firms',
+      priceMonthly: null,
+      priceYearly: null,
+      maxUnits: null,
+      maxUsers: null,
+      trialDays: 30,
       includesLabel: 'Everything in Professional, plus',
       features: [
-        'Multi-Community Dashboard',
-        'Advanced Audit Trails',
-        'Data Isolation',
-        'Custom Configuration',
-        'API / Integration Support',
-        'Deployment Planning',
+        'White-Label Branding',
+        'API Access & Webhooks',
+        'Single Sign-On (SSO)',
+        'Multi-Property Dashboard',
+        'Dedicated Account Manager',
+        'Priority Support & SLA',
+        'Custom Integrations',
       ],
       cta: 'Request Enterprise Proposal',
+      highlighted: false,
     },
   ]
 
@@ -264,19 +317,217 @@ function PlansSection() {
             Subscription Plans
           </h2>
           <p className="text-primary-600 max-w-2xl mx-auto">
-            Select a plan based on your community size and governance requirements.
+            Choose the plan that fits your community size. All plans include a free trial and can be cancelled anytime.
           </p>
         </div>
-        
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
           {plans.map((plan) => (
-            <PlanCard 
-              key={plan.name} 
-              plan={plan} 
-              highlighted={plan.highlighted} 
-            />
+            <PlanCard key={plan.name} plan={plan} />
           ))}
         </div>
+
+        <p className="text-center text-sm text-primary-500 mt-6">
+          All prices in INR · GST applicable · Annual billing saves 20%
+        </p>
+      </Container>
+    </section>
+  )
+}
+
+// Feature Comparison Table
+function ComparisonTableSection() {
+  const plans = ['Starter', 'Essential', 'Professional', 'Enterprise']
+
+  // null = custom/unlimited, number = limit, true/false = included/not
+  const scaleRows = [
+    { label: 'Residential Units',   values: ['Up to 50', 'Up to 500', 'Up to 2,000', 'Unlimited'] },
+    { label: 'User Accounts',        values: ['Up to 150', 'Up to 1,500', 'Up to 6,000', 'Unlimited'] },
+    { label: 'Free Trial',           values: ['14 days', '14 days', '14 days', '30 days'] },
+  ]
+
+  const categories = [
+    {
+      title: 'Core Operations',
+      rows: [
+        { label: 'Visitor Management & Check-in/out', values: [true, true, true, true] },
+        { label: 'QR Code Entry System',              values: [true, true, true, true] },
+        { label: 'Notices & Announcements',            values: [true, true, true, true] },
+        { label: 'Complaint Management',               values: [true, true, true, true] },
+        { label: 'Recurring Visitor Management',       values: [false, true, true, true] },
+        { label: 'Package / Parcel Tracking',          values: [false, true, true, true] },
+        { label: 'Vehicle Registration',               values: [false, true, true, true] },
+      ],
+    },
+    {
+      title: 'Finance & Billing',
+      rows: [
+        { label: 'Maintenance Billing & Payments',     values: [false, true, true, true] },
+        { label: 'Society Accounting',                 values: [false, false, true, true] },
+        { label: 'Vendor Payments',                    values: [false, false, true, true] },
+      ],
+    },
+    {
+      title: 'Facilities & Staff',
+      rows: [
+        { label: 'Amenity Booking & Management',       values: [false, true, true, true] },
+        { label: 'Staff & Shift Management',           values: [false, true, true, true] },
+        { label: 'Vendor Management',                  values: [false, true, true, true] },
+        { label: 'Work Orders & Maintenance Tracking', values: [false, false, true, true] },
+      ],
+    },
+    {
+      title: 'Community & Governance',
+      rows: [
+        { label: 'Events, Polls & Surveys',            values: [false, false, true, true] },
+        { label: 'Governance & Board Elections',       values: [false, false, true, true] },
+        { label: 'Document Management',                values: [false, false, true, true] },
+      ],
+    },
+    {
+      title: 'Analytics & Reports',
+      rows: [
+        { label: 'Basic Reports',                      values: [true, true, true, true] },
+        { label: 'Advanced Analytics & Dashboards',    values: [false, false, true, true] },
+        { label: 'Advanced Reports & Exports',         values: [false, false, true, true] },
+        { label: 'Custom Report Builder',              values: [false, false, false, true] },
+      ],
+    },
+    {
+      title: 'Security & Compliance',
+      rows: [
+        { label: 'Role-Based Access Control',          values: [true, true, true, true] },
+        { label: 'Audit Logs & Activity Tracking',     values: [false, false, true, true] },
+        { label: 'Two-Factor Authentication (2FA)',     values: [false, false, true, true] },
+        { label: 'Single Sign-On (SSO)',               values: [false, false, false, true] },
+      ],
+    },
+    {
+      title: 'Enterprise & Platform',
+      rows: [
+        { label: 'API Access & Webhooks',              values: [false, false, false, true] },
+        { label: 'White-Label Branding',               values: [false, false, false, true] },
+        { label: 'Multi-Property Dashboard',           values: [false, false, false, true] },
+        { label: 'Custom Integrations',                values: [false, false, false, true] },
+        { label: 'Dedicated Account Manager',          values: [false, false, false, true] },
+        { label: 'Priority Support & SLA',             values: [false, false, false, true] },
+      ],
+    },
+  ]
+
+  const planColors = [
+    '',
+    '',
+    'text-accent-600 font-bold',
+    '',
+  ]
+
+  return (
+    <section className="section-padding bg-white">
+      <Container>
+        <div className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-4 tracking-tight">
+            Compare Plans
+          </h2>
+          <p className="text-primary-600 max-w-2xl mx-auto">
+            See exactly which features are included in each plan.
+          </p>
+        </div>
+
+        <div className="overflow-x-auto rounded-xl border border-primary-200 shadow-sm">
+          <table className="w-full min-w-[640px] border-collapse">
+            <thead>
+              <tr className="bg-primary-900">
+                <th className="text-left px-5 py-4 text-sm font-semibold text-primary-300 w-2/5">
+                  Feature
+                </th>
+                {plans.map((plan, i) => (
+                  <th
+                    key={plan}
+                    className={`px-4 py-4 text-center text-sm font-semibold ${
+                      i === 2 ? 'text-accent-400' : 'text-white'
+                    }`}
+                  >
+                    {plan}
+                    {i === 2 && (
+                      <span className="ml-1.5 text-xs bg-accent-500 text-white px-1.5 py-0.5 rounded-full align-middle">
+                        ★
+                      </span>
+                    )}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {/* Scale rows */}
+              <tr>
+                <td colSpan={5} className="px-5 py-2 bg-primary-50 text-xs font-semibold text-primary-500 uppercase tracking-wider">
+                  Scale & Limits
+                </td>
+              </tr>
+              {scaleRows.map((row) => (
+                <tr key={row.label} className="border-t border-primary-100 hover:bg-neutral-50 transition-colors">
+                  <td className="px-5 py-3 text-sm text-primary-700">{row.label}</td>
+                  {row.values.map((val, i) => (
+                    <td key={i} className={`px-4 py-3 text-center text-sm font-medium ${i === 2 ? 'text-accent-600' : 'text-primary-800'}`}>
+                      {val}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+
+              {/* Feature category rows */}
+              {categories.map((cat) => (
+                <Fragment key={cat.title}>
+                  <tr>
+                    <td colSpan={5} className="px-5 py-2 bg-primary-50 text-xs font-semibold text-primary-500 uppercase tracking-wider">
+                      {cat.title}
+                    </td>
+                  </tr>
+                  {cat.rows.map((row) => (
+                    <tr key={row.label} className="border-t border-primary-100 hover:bg-neutral-50 transition-colors">
+                      <td className="px-5 py-3 text-sm text-primary-700">{row.label}</td>
+                      {row.values.map((included, i) => (
+                        <td key={i} className="px-4 py-3 text-center">
+                          {included ? (
+                            <Check className={`h-4 w-4 mx-auto ${i === 2 ? 'text-accent-500' : 'text-green-600'}`} />
+                          ) : (
+                            <Minus className="h-4 w-4 mx-auto text-primary-200" />
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </Fragment>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="bg-primary-50 border-t-2 border-primary-200">
+                <td className="px-5 py-4 text-sm font-medium text-primary-700">Get started</td>
+                {plans.map((plan, i) => (
+                  <td key={plan} className="px-4 py-4 text-center">
+                    <Link
+                      href="/contact"
+                      className={`inline-block text-xs font-semibold px-4 py-2 rounded-lg transition-colors ${
+                        i === 2
+                          ? 'bg-accent-500 text-white hover:bg-accent-600'
+                          : i === 3
+                          ? 'bg-primary-900 text-white hover:bg-primary-800'
+                          : 'bg-primary-100 text-primary-800 hover:bg-primary-200'
+                      }`}
+                    >
+                      {i === 3 ? 'Contact Us' : 'Try Free'}
+                    </Link>
+                  </td>
+                ))}
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <p className="text-center text-xs text-primary-400 mt-4">
+          All prices in INR · GST applicable · ★ Most Popular
+        </p>
       </Container>
     </section>
   )
@@ -566,6 +817,7 @@ export default function PricingPage() {
       <HeroSection />
       <PhilosophySection />
       <PlansSection />
+      <ComparisonTableSection />
       <AddOnsSection />
       <ImplementationSection />
       <CommitmentSection />

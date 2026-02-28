@@ -8,12 +8,8 @@ import {
   Zap,
   Globe,
   Award,
-  Building,
   ArrowRight,
-  Linkedin,
-  Twitter,
   CheckCircle,
-  MapPin,
   Briefcase,
 } from 'lucide-react'
 import Container from '../components/Container'
@@ -75,20 +71,20 @@ function StorySection() {
             <div className="bg-gradient-to-br from-primary-50 to-neutral-100 rounded-3xl p-8 border border-primary-100">
               <div className="grid grid-cols-2 gap-6">
                 <div className="bg-white rounded-2xl p-6 shadow-soft text-center">
-                  <p className="text-4xl font-bold text-primary-900 mb-2">2022</p>
-                  <p className="text-sm text-primary-600">Founded</p>
+                  <p className="text-4xl font-bold text-primary-900 mb-2">2026</p>
+                  <p className="text-sm text-primary-600">Est.</p>
                 </div>
                 <div className="bg-white rounded-2xl p-6 shadow-soft text-center">
-                  <p className="text-4xl font-bold text-primary-900 mb-2">500+</p>
-                  <p className="text-sm text-primary-600">Communities</p>
-                </div>
-                <div className="bg-white rounded-2xl p-6 shadow-soft text-center">
-                  <p className="text-4xl font-bold text-primary-900 mb-2">1M+</p>
-                  <p className="text-sm text-primary-600">Residents</p>
-                </div>
-                <div className="bg-white rounded-2xl p-6 shadow-soft text-center">
-                  <p className="text-4xl font-bold text-primary-900 mb-2">50+</p>
+                  <p className="text-4xl font-bold text-primary-900 mb-2">10+</p>
                   <p className="text-sm text-primary-600">Team Members</p>
+                </div>
+                <div className="bg-white rounded-2xl p-6 shadow-soft text-center">
+                  <p className="text-4xl font-bold text-primary-900 mb-2">India</p>
+                  <p className="text-sm text-primary-600">Primary Market</p>
+                </div>
+                <div className="bg-white rounded-2xl p-6 shadow-soft text-center">
+                  <p className="text-4xl font-bold text-primary-900 mb-2">Beta</p>
+                  <p className="text-sm text-primary-600">Current Stage</p>
                 </div>
               </div>
             </div>
@@ -217,73 +213,75 @@ function ValuesSection() {
 function TeamSection() {
   const team = [
     {
-      name: 'Rajesh Kumar',
-      role: 'Co-founder & CEO',
-      bio: 'Former engineering lead at Flipkart. IIT Delhi alumnus.',
-      linkedin: '#',
-      twitter: '#',
+      name: 'Swetha Bala',
+      nameNote: 'Loukya',
+      initials: 'SB',
+      role: 'Founder & CEO',
+      bio: [
+        'Swetha Bala leads GateFlux with a focus on governance integrity and financial transparency for residential communities. She defines the company’s strategic direction, ensuring disciplined execution and long-term institutional reliability.',
+      ],
     },
     {
-      name: 'Priya Sharma',
-      role: 'Co-founder & CTO',
-      bio: 'Ex-Amazon principal engineer. Expert in distributed systems.',
-      linkedin: '#',
-      twitter: '#',
+      name: 'Ravikanth Katkam',
+      initials: 'RK',
+      role: 'Co-Founder & CTO',
+      bio: [
+        'Ravikanth Katkam brings over 15 years of experience building scalable, enterprise-grade systems. He leads platform architecture and financial intelligence infrastructure, ensuring audit-ready reliability and performance at scale.',
+      ],
     },
     {
-      name: 'Arjun Menon',
-      role: 'VP Product',
-      bio: 'Previously led product at Swiggy. IIIT Hyderabad alumnus.',
-      linkedin: '#',
-      twitter: '#',
-    },
-    {
-      name: 'Sneha Patel',
-      role: 'VP Engineering',
-      bio: 'Built engineering teams at Ola and Razorpay.',
-      linkedin: '#',
-      twitter: '#',
+      name: 'Kranthi Kumar',
+      initials: 'KK',
+      role: 'VP – Product',
+      bio: [
+        'Kranthi Kumar leads product strategy, designing structured workflows that enable committees to operate with clarity and control. His focus is on decision-centric dashboards and precise financial reporting systems.',
+      ],
     },
   ]
 
   return (
-    <section className="section-padding bg-primary-50" id="team">
+    <section className="section-padding bg-neutral-50 border-t border-neutral-100" id="team">
       <Container>
         <SectionHeader
           badge="Leadership"
           title="Meet Our Team"
-          subtitle="Industry veterans united by a passion for building great products."
+          subtitle="The people building GateFlux."
         />
 
-        <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="mt-14 grid lg:grid-cols-3 gap-8">
           {team.map((member) => (
             <div
               key={member.name}
-              className="bg-white rounded-xl p-5 border border-primary-100 text-center"
+              className="bg-white rounded-2xl border border-neutral-200 overflow-hidden flex flex-col"
             >
-              <div className="w-20 h-20 rounded-lg bg-primary-50 flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-primary-700">
-                  {member.name.split(' ').map(n => n[0]).join('')}
-                </span>
-              </div>
-              <h3 className="text-base font-bold text-primary-900 mb-1 tracking-tight">{member.name}</h3>
-              <p className="text-primary-700 text-sm font-medium mb-2">{member.role}</p>
-              <p className="text-primary-600 text-xs mb-4">{member.bio}</p>
-              <div className="flex items-center justify-center gap-3">
-                <a
-                  href={member.linkedin}
-                  className="text-primary-400 hover:text-primary-700 transition-colors"
-                  aria-label="LinkedIn"
-                >
-                  <Linkedin className="h-5 w-5" />
-                </a>
-                <a
-                  href={member.twitter}
-                  className="text-primary-400 hover:text-primary-700 transition-colors"
-                  aria-label="Twitter"
-                >
-                  <Twitter className="h-5 w-5" />
-                </a>
+              {/* Card header strip */}
+              <div className="h-1.5 bg-gradient-to-r from-primary-800 to-primary-600" />
+
+              <div className="p-7 flex flex-col flex-1">
+                {/* Avatar + identity */}
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-14 h-14 rounded-full bg-primary-900 flex items-center justify-center flex-shrink-0">
+                    <span className="text-base font-bold text-white">{member.initials}</span>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-primary-900 tracking-tight leading-tight">
+                      {member.name}
+                    </h3>
+                    {member.nameNote && (
+                      <p className="text-xs text-neutral-400 mt-0.5">({member.nameNote})</p>
+                    )}
+                    <p className="text-[11px] font-semibold text-accent-600 uppercase tracking-widest mt-1">
+                      {member.role}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Bio paragraphs */}
+                <div className="flex-1 border-t border-neutral-100 pt-5 space-y-3">
+                  {member.bio.map((para, i) => (
+                    <p key={i} className="text-sm text-neutral-600 leading-relaxed">{para}</p>
+                  ))}
+                </div>
               </div>
             </div>
           ))}
@@ -296,24 +294,83 @@ function TeamSection() {
 // Investors Section
 function InvestorsSection() {
   return (
-    <section className="section-padding bg-white">
+    <section className="section-padding bg-white" id="partners">
       <Container>
-        <SectionHeader
-          badge="Backed By"
-          title="Our Investors"
-          subtitle="Supported by leading venture capital firms and industry experts."
-        />
-
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-12">
-          {/* Placeholder for investor logos */}
-          {['Sequoia Capital', 'Accel Partners', 'Matrix Partners', 'Elevation Capital'].map((investor) => (
-            <div
-              key={investor}
-              className="px-8 py-4 rounded-xl bg-primary-50 text-primary-400 font-semibold"
-            >
-              {investor}
+        <div className="max-w-4xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            <div>
+              <span className="inline-flex items-center px-3 py-1 rounded text-sm font-medium bg-primary-50 text-primary-700 mb-5">
+                Investor Relations
+              </span>
+              <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-5 tracking-tight">
+                Building the Infrastructure Layer for India's Communities
+              </h2>
+              <p className="text-primary-700 text-sm leading-relaxed mb-6">
+                India has over 100,000 registered housing societies. The tools they rely on
+                today are fragmented, manual, or built for the wrong audience. GateFlux is
+                building the unified governance, finance, and security platform this market
+                has never had.
+              </p>
+              <div className="space-y-3 mb-8">
+                {[
+                  'Large, underpenetrated market across urban India',
+                  'SaaS model with predictable recurring revenue',
+                  'Deep compliance and data infrastructure from day one',
+                  'Early-stage — right time to get involved',
+                ].map(item => (
+                  <div key={item} className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-accent-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-primary-700 text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <a
+                href="mailto:investors@gateflux.co"
+                className="inline-flex items-center gap-2 bg-primary-900 text-white font-medium px-5 py-3 rounded-lg hover:bg-primary-800 transition-colors"
+              >
+                Get in Touch
+                <ArrowRight className="h-4 w-4" />
+              </a>
             </div>
-          ))}
+
+            <div className="bg-primary-50 border border-primary-100 rounded-2xl p-8">
+              <p className="text-xs font-semibold text-primary-500 uppercase tracking-wider mb-6">
+                What We're Looking For
+              </p>
+              <div className="space-y-5">
+                {[
+                  {
+                    title: 'Strategic Seed Investors',
+                    desc: 'Investors with experience in SaaS, PropTech, or Indian consumer infrastructure.',
+                  },
+                  {
+                    title: 'Angel Advisors',
+                    desc: 'Operators with networks in RWAs, housing societies, or cooperative governance.',
+                  },
+                  {
+                    title: 'Industry Partners',
+                    desc: 'Technology partners, system integrators, or distribution channel partners.',
+                  },
+                ].map(({ title, desc }) => (
+                  <div key={title} className="flex items-start gap-3">
+                    <div className="w-2 h-2 rounded-full bg-accent-500 flex-shrink-0 mt-1.5" />
+                    <div>
+                      <p className="font-semibold text-primary-900 text-sm">{title}</p>
+                      <p className="text-primary-600 text-xs mt-0.5 leading-relaxed">{desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 pt-5 border-t border-primary-200">
+                <p className="text-xs text-primary-500">
+                  Deck and financial projections available on request.{' '}
+                  <a href="mailto:investors@gateflux.co" className="text-primary-700 hover:text-primary-900 font-medium underline">
+                    investors@gateflux.co
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </Container>
     </section>
@@ -322,13 +379,6 @@ function InvestorsSection() {
 
 // Careers Section
 function CareersSection() {
-  const openings = [
-    { title: 'Senior Backend Engineer', location: 'Bangalore', type: 'Full-time' },
-    { title: 'Product Designer', location: 'Remote', type: 'Full-time' },
-    { title: 'Customer Success Manager', location: 'Mumbai', type: 'Full-time' },
-    { title: 'Growth Marketing Manager', location: 'Bangalore', type: 'Full-time' },
-  ]
-
   return (
     <section className="section-padding bg-primary-50" id="careers">
       <Container>
@@ -366,48 +416,32 @@ function CareersSection() {
             </div>
 
             <a
-              href="mailto:careers@gateflux.com"
+              href="mailto:careers@gateflux.co"
               className="inline-flex items-center gap-2 text-primary-700 hover:text-primary-900 font-medium"
             >
               Send your resume
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="h-4 w-4 transition-transform" />
             </a>
           </div>
 
           <div>
-            <div className="bg-white rounded-2xl p-6 shadow-soft border border-primary-100">
-              <h3 className="font-semibold text-primary-900 mb-4">Open Positions</h3>
-              <div className="space-y-3">
-                {openings.map((job) => (
-                  <div
-                    key={job.title}
-                    className="flex items-center justify-between p-4 rounded-xl bg-primary-50 hover:bg-primary-100 transition-colors cursor-pointer"
-                  >
-                    <div>
-                      <p className="font-medium text-primary-900">{job.title}</p>
-                      <div className="flex items-center gap-3 text-sm text-primary-500 mt-1">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {job.location}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Briefcase className="h-3 w-3" />
-                          {job.type}
-                        </span>
-                      </div>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-primary-400" />
-                  </div>
-                ))}
+            <div className="bg-white rounded-2xl p-8 shadow-soft border border-primary-100 text-center">
+              <div className="w-14 h-14 rounded-full bg-primary-50 flex items-center justify-center mx-auto mb-5">
+                <Briefcase className="h-6 w-6 text-primary-400" />
               </div>
-              <div className="mt-4 pt-4 border-t border-primary-100 text-center">
-                <a
-                  href="mailto:careers@gateflux.com"
-                  className="text-sm text-primary-600 hover:text-primary-900 font-medium"
-                >
-                  View all openings →
-                </a>
-              </div>
+              <h3 className="font-semibold text-primary-900 mb-2">No Open Positions</h3>
+              <p className="text-sm text-primary-600 leading-relaxed mb-5">
+                We don't have any open positions right now, but we're always interested in
+                meeting talented people. Send us your resume and we'll keep you in mind for
+                future opportunities.
+              </p>
+              <a
+                href="mailto:careers@gateflux.co"
+                className="inline-flex items-center gap-2 bg-primary-900 text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-primary-800 transition-colors"
+              >
+                Express Interest
+                <ArrowRight className="h-4 w-4" />
+              </a>
             </div>
           </div>
         </div>
@@ -418,53 +452,33 @@ function CareersSection() {
 
 // Press Section
 function PressSection() {
-  const pressItems = [
-    {
-      publication: 'TechCrunch',
-      headline: 'GateFlux raises $10M to modernize apartment management in India',
-      date: 'Jan 2024',
-    },
-    {
-      publication: 'Economic Times',
-      headline: 'How GateFlux is solving India\'s community management challenges',
-      date: 'Dec 2023',
-    },
-    {
-      publication: 'YourStory',
-      headline: 'GateFlux: The startup making gated communities smarter',
-      date: 'Nov 2023',
-    },
-  ]
-
   return (
     <section className="section-padding bg-white" id="press">
       <Container>
         <SectionHeader
           badge="Press"
-          title="In the News"
-          subtitle="What others are saying about GateFlux."
+          title="Press & Media"
+          subtitle="GateFlux is currently in development. We'll update this section as coverage becomes available."
         />
 
-        <div className="mt-12 grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          {pressItems.map((item) => (
-            <div
-              key={item.headline}
-              className="bg-primary-50 rounded-2xl p-6 hover:bg-primary-100 transition-colors cursor-pointer"
-            >
-              <p className="text-sm text-primary-600 font-semibold mb-2">{item.publication}</p>
-              <p className="text-primary-900 font-medium mb-3">{item.headline}</p>
-              <p className="text-sm text-primary-500">{item.date}</p>
+        <div className="mt-10 max-w-2xl mx-auto">
+          <div className="bg-primary-50 border border-primary-100 rounded-2xl p-8 text-center">
+            <p className="text-primary-700 text-sm leading-relaxed mb-6">
+              If you're a journalist or content creator interested in covering GateFlux,
+              we'd love to connect. We can arrange product demos, founder interviews, and
+              provide background on our vision for community management in India.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
+              <a
+                href="mailto:press@gateflux.co"
+                className="inline-flex items-center gap-2 bg-primary-900 text-white font-medium px-5 py-2.5 rounded-lg hover:bg-primary-800 transition-colors"
+              >
+                Press Enquiries
+                <ArrowRight className="h-4 w-4" />
+              </a>
+              <span className="text-primary-500">press@gateflux.co</span>
             </div>
-          ))}
-        </div>
-
-        <div className="mt-8 text-center">
-          <p className="text-primary-600">
-            For press inquiries, contact{' '}
-            <a href="mailto:press@gateflux.com" className="text-primary-700 hover:text-primary-900 font-medium underline">
-              press@gateflux.com
-            </a>
-          </p>
+          </div>
         </div>
       </Container>
     </section>
@@ -483,7 +497,7 @@ function CTASection() {
             Ready to Transform Your Community?
           </h2>
           <p className="text-lg text-primary-200 mb-8">
-            Join hundreds of communities that have already made the switch to GateFlux.
+            Be among the first communities to experience smarter, structured management with GateFlux.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
