@@ -157,7 +157,7 @@ export const trackOutboundLink = (url, linkText) => {
   })
 }
 
-export default {
+const analytics = {
   initAnalytics,
   initWebVitals,
   trackPageView,
@@ -167,3 +167,5 @@ export default {
   trackOutboundLink,
   pushToDataLayer,
 }
+
+export default analytics

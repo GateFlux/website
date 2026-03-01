@@ -1,4 +1,5 @@
 import { Star } from 'lucide-react'
+import Image from 'next/image'
 
 export default function TestimonialCard({
   quote,
@@ -30,14 +31,13 @@ export default function TestimonialCard({
       {/* Author */}
       <div className="flex items-center gap-3">
         {image ? (
-          <img
+          <Image
             src={image}
             alt={author}
             width={40}
             height={40}
             className="w-10 h-10 rounded-full object-cover"
-            loading="lazy"
-            decoding="async"
+            unoptimized
           />
         ) : (
           <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center">

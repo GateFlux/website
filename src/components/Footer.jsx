@@ -187,8 +187,8 @@ export default function Footer() {
               </div>
               <div>
                 <p className="text-xs text-primary-400 uppercase tracking-wider">Email</p>
-                <a href="mailto:hello@gateflux.com" className="text-white hover:text-accent-400 transition-colors">
-                  hello@gateflux.com
+                <a href="mailto:hello@gateflux.co" className="text-white hover:text-accent-400 transition-colors">
+                  hello@gateflux.co
                 </a>
               </div>
             </div>

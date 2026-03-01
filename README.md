@@ -178,7 +178,7 @@ The built files can be deployed to any static hosting:
 Create a `.env` file for environment-specific configuration:
 
 ```env
-VITE_API_URL=https://api.gateflux.com
+VITE_API_URL=https://api.gateflux.co
 VITE_GA_TRACKING_ID=G-XXXXXXXXXX
 ```
 

@@ -93,7 +93,7 @@ function HeroSection() {
                   </div>
                   <div className="flex-1 text-center">
                     <div className="bg-primary-800 rounded px-4 py-1 text-xs text-primary-400 inline-block font-mono">
-                      dashboard.gateflux.com
+                      app.gateflux.co/dashboard
                     </div>
                   </div>
                 </div>
