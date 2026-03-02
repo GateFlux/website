@@ -2,7 +2,7 @@ import AboutPage from '../../src/views/AboutPage'
 
 export const metadata = {
   title: 'About Us — GateFlux',
-  description: 'GateFlux is on a mission to modernise community living across India. Learn about our story, the team behind the platform, and why we're building smarter, safer communities.',
+  description: "GateFlux is on a mission to modernise community living across India. Learn about our story, the team behind the platform, and why we're building smarter, safer communities.",
   alternates: { canonical: 'https://gateflux.co/about' },
   openGraph: {
     title: 'About Us — GateFlux',
