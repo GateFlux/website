@@ -403,8 +403,8 @@ function PlatformSection() {
                 <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
                   <Zap className="h-8 w-8 text-accent-500" />
                 </div>
-                <h4 className="font-semibold text-white mb-1">API Access</h4>
-                <p className="text-sm text-primary-300">Full integration</p>
+                <h4 className="font-semibold text-white mb-1">Easy Integrations</h4>
+                <p className="text-sm text-primary-300">Works with your tools</p>
               </div>
             </div>
           </div>

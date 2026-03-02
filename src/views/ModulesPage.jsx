@@ -33,7 +33,7 @@ import Container from '../components/Container'
 
 const PLATFORM_TAGS = {
   web: { label: 'Web', className: 'bg-blue-100 text-blue-700' },
-  api: { label: 'API', className: 'bg-green-100 text-green-700' },
+  api: { label: 'Connected', className: 'bg-green-100 text-green-700' },
   mobile: { label: 'Mobile', className: 'bg-purple-100 text-purple-700' },
   stub: { label: 'Hardware', className: 'bg-orange-100 text-orange-700' },
 }
@@ -207,8 +207,8 @@ const categories = [
       },
       {
         name: 'Payments',
-        description: 'Payment collection with Razorpay & Stripe integration, manual recording, receipts, and webhooks.',
-        capabilities: ['Gateway payment (Razorpay / Stripe)', 'Manual payment recording', 'Payment receipts & email', 'Webhook processing'],
+        description: 'Payment collection with Razorpay & Stripe integration, manual recording, receipts, and automatic status updates.',
+        capabilities: ['Gateway payment (Razorpay / Stripe)', 'Manual payment recording', 'Payment receipts & email', 'Automatic payment status sync'],
         platforms: ['web', 'api', 'mobile'],
       },
       {
@@ -348,9 +348,9 @@ const categories = [
         platforms: ['web', 'api'],
       },
       {
-        name: 'API Access & Webhooks',
-        description: 'Full REST API access with webhook support for real-time event-driven integrations.',
-        capabilities: ['REST API with API key auth', 'Webhook endpoints (outbound)', 'API rate limiting', 'Developer documentation'],
+        name: 'Advanced Integrations',
+        description: 'Connect GateFlux with ERP, accounting, and third-party tools with reliable real-time sync.',
+        capabilities: ['Secure integration connectors', 'Real-time data sync', 'High-volume processing support', 'Integration setup guidance'],
         platforms: ['api'],
       },
       {

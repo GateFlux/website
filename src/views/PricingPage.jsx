@@ -297,7 +297,7 @@ function PlansSection() {
       includesLabel: 'Everything in Professional, plus',
       features: [
         'White-Label Branding',
-        'API Access & Webhooks',
+        'Advanced Integrations',
         'Single Sign-On (SSO)',
         'Multi-Property Dashboard',
         'Dedicated Account Manager',
@@ -405,7 +405,7 @@ function ComparisonTableSection() {
     {
       title: 'Enterprise & Platform',
       rows: [
-        { label: 'API Access & Webhooks',              values: [false, false, false, true] },
+        { label: 'Advanced Integrations',              values: [false, false, false, true] },
         { label: 'White-Label Branding',               values: [false, false, false, true] },
         { label: 'Multi-Property Dashboard',           values: [false, false, false, true] },
         { label: 'Custom Integrations',                values: [false, false, false, true] },

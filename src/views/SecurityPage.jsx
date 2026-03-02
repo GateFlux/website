@@ -218,8 +218,8 @@ function ComplianceSection() {
     {
       code: 'P1–P8',
       name: 'Privacy',
-      description: 'Audit log retention by action severity (1–3 years). Data minimisation enforced in collection. Soft-delete with anonymisation workflow in progress for full Art. 17 compliance.',
-      status: 'in-progress',
+      description: 'Audit log retention by action severity (1–3 years). Data minimisation enforced in collection. Soft-delete with anonymisation workflow implemented for Art. 17 compliance.',
+      status: 'implemented',
     },
   ]
 
@@ -546,7 +546,7 @@ function InfrastructureSection() {
                   </div>
                   <div>
                     <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-primary-600">API Response Time</span>
+                      <span className="text-primary-600">System Response Time</span>
                       <span className="font-semibold text-primary-900 font-mono">&lt;100ms</span>
                     </div>
                     <div className="h-1.5 bg-primary-100 rounded-full overflow-hidden">
