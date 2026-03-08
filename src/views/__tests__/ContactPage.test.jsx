@@ -5,17 +5,32 @@ import ContactPage from '../ContactPage'
 // Mock lucide-react icons to avoid SVG rendering issues in tests
 jest.mock('lucide-react', () => {
   const Icon = ({ className }) => <svg className={className} />
+  Icon.displayName = 'MockIcon'
   return new Proxy({}, { get: () => Icon })
 })
 
 // Mock sub-components that aren't under test
-jest.mock('../../components/Container', () => ({ children, className }) => (
-  <div className={className}>{children}</div>
-))
-jest.mock('../../components/SectionHeader', () => () => <div data-testid="section-header" />)
-jest.mock('../../components/FAQ', () => ({ items }) => (
-  <ul>{items.map((item) => <li key={item.question}>{item.question}</li>)}</ul>
-))
+jest.mock('../../components/Container', () => {
+  const MockContainer = ({ children, className }) => (
+    <div className={className}>{children}</div>
+  )
+  MockContainer.displayName = 'MockContainer'
+  return MockContainer
+})
+
+jest.mock('../../components/SectionHeader', () => {
+  const MockSectionHeader = () => <div data-testid="section-header" />
+  MockSectionHeader.displayName = 'MockSectionHeader'
+  return MockSectionHeader
+})
+
+jest.mock('../../components/FAQ', () => {
+  const MockFaq = ({ items }) => (
+    <ul>{items.map((item) => <li key={item.question}>{item.question}</li>)}</ul>
+  )
+  MockFaq.displayName = 'MockFaq'
+  return MockFaq
+})
 
 describe('ContactPage', () => {
   it('renders the contact form', () => {
@@ -26,13 +41,7 @@ describe('ContactPage', () => {
 
 describe('ContactForm', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
     render(<ContactPage />)
-  })
-
-  afterEach(() => {
-    jest.runOnlyPendingTimers()
-    jest.useRealTimers()
   })
 
   it('renders all required form fields', () => {
@@ -80,63 +89,58 @@ describe('ContactForm', () => {
   })
 
   it('updates field values on input', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
+    const user = userEvent.setup()
     const nameInput = screen.getByLabelText(/full name/i)
     await user.type(nameInput, 'Jane Doe')
     expect(nameInput).toHaveValue('Jane Doe')
   })
 
   it('shows submitting state while form is being submitted', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
+    const user = userEvent.setup()
 
     await user.type(screen.getByLabelText(/full name/i), 'Jane Doe')
     await user.type(screen.getByLabelText(/email address/i), 'jane@example.com')
     await user.type(screen.getByLabelText(/phone number/i), '+91 91210 92479')
     await user.type(screen.getByLabelText(/community name/i), 'Test Apartments')
+    fireEvent.change(screen.getByLabelText(/number of units/i), { target: { value: '51-100' } })
+    fireEvent.change(screen.getByLabelText(/role/i), { target: { value: 'committee' } })
 
     const submitButton = screen.getByRole('button', { name: /book demo/i })
     fireEvent.click(submitButton)
 
-    expect(screen.getByText(/submitting/i)).toBeInTheDocument()
-    expect(submitButton).toBeDisabled()
+    expect(screen.getByRole('button', { name: /submitting/i })).toBeDisabled()
   })
 
   it('shows success state after form submission completes', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
+    const user = userEvent.setup()
 
     await user.type(screen.getByLabelText(/full name/i), 'Jane Doe')
     await user.type(screen.getByLabelText(/email address/i), 'jane@example.com')
     await user.type(screen.getByLabelText(/phone number/i), '+91 91210 92479')
     await user.type(screen.getByLabelText(/community name/i), 'Test Apartments')
+    fireEvent.change(screen.getByLabelText(/number of units/i), { target: { value: '51-100' } })
+    fireEvent.change(screen.getByLabelText(/role/i), { target: { value: 'committee' } })
 
     fireEvent.click(screen.getByRole('button', { name: /book demo/i }))
 
-    // Fast-forward past the 1500ms simulated delay
-    await waitFor(() => {
-      jest.advanceTimersByTime(1500)
-    })
-
-    await waitFor(() => {
-      expect(screen.getByText(/thank you/i)).toBeInTheDocument()
-    })
+    expect(await screen.findByText(/thank you/i, {}, { timeout: 2500 })).toBeInTheDocument()
 
     expect(screen.getByText(/we've received your request/i)).toBeInTheDocument()
   })
 
   it('resets form when "Submit another request" is clicked', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
+    const user = userEvent.setup()
 
     await user.type(screen.getByLabelText(/full name/i), 'Jane Doe')
+    await user.type(screen.getByLabelText(/email address/i), 'jane@example.com')
+    await user.type(screen.getByLabelText(/phone number/i), '+91 91210 92479')
+    await user.type(screen.getByLabelText(/community name/i), 'Test Apartments')
+    fireEvent.change(screen.getByLabelText(/number of units/i), { target: { value: '51-100' } })
+    fireEvent.change(screen.getByLabelText(/role/i), { target: { value: 'committee' } })
 
     fireEvent.click(screen.getByRole('button', { name: /book demo/i }))
 
-    await waitFor(() => {
-      jest.advanceTimersByTime(1500)
-    })
-
-    await waitFor(() => {
-      expect(screen.getByText(/thank you/i)).toBeInTheDocument()
-    })
+    expect(await screen.findByText(/thank you/i, {}, { timeout: 2500 })).toBeInTheDocument()
 
     fireEvent.click(screen.getByText(/submit another request/i))
 

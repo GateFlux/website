@@ -97,8 +97,8 @@ function HeroSection() {
             <span className="text-primary-200">Operational Layers</span>
           </h1>
           <p className="text-base md:text-lg text-primary-300 leading-relaxed">
-            GateFlux provides comprehensive tools for visitor management, community engagement, 
-            financial operations, and administrative governance.
+            GateFlux is a modern community operating system for residential governance, finance,
+            operations, security, and engagement.
           </p>
         </div>
       </Container>
@@ -109,9 +109,9 @@ function HeroSection() {
 // Quick Stats
 function QuickStats() {
   const stats = [
-    { icon: Shield, value: '50+', label: 'Security Features' },
-    { icon: Users, value: '20+', label: 'Community Tools' },
-    { icon: CreditCard, value: '15+', label: 'Financial Modules' },
+    { icon: Shield, value: '50+', label: 'Operations & Access Controls' },
+    { icon: Users, value: '20+', label: 'Community & Governance Tools' },
+    { icon: CreditCard, value: '15+', label: 'Finance Automations' },
     { icon: Smartphone, value: '3', label: 'Native Apps' },
   ]
 
@@ -134,23 +134,23 @@ function QuickStats() {
   )
 }
 
-// Visitor & Security Section
+// Security & Access Section
 function VisitorSecuritySection() {
   const features = [
     {
       icon: UserCheck,
-      title: 'Visitor Pre-Approval Workflow',
-      description: 'Residents can pre-approve expected visitors with OTP verification before arrival.',
+      title: 'Access Request Workflow',
+      description: 'Members can pre-authorize access requests with OTP verification before arrival.',
     },
     {
       icon: QrCode,
       title: 'QR & OTP Entry Validation',
-      description: 'Generate unique QR codes and OTPs for visitors for instant verification and entry.',
+      description: 'Generate QR codes and OTPs for instant entry verification and controlled access.',
     },
     {
       icon: Truck,
       title: 'Delivery Logging & History',
-      description: 'Track all deliveries from entry to handover with complete history and timestamps.',
+      description: 'Track all deliveries from gate entry to handover with complete timestamped history.',
     },
     {
       icon: User,
@@ -174,8 +174,8 @@ function VisitorSecuritySection() {
       <Container>
         <FeatureCategory
           icon={Shield}
-          title="Visitor & Security Management"
-          description="Complete control over who enters your community. From pre-approvals to real-time tracking, ensure safety without compromising convenience."
+          title="Security & Access"
+          description="Control access across gates, deliveries, and vehicles while maintaining a fast, predictable entry flow."
           features={features}
         />
       </Container>
@@ -203,8 +203,8 @@ function CommunitySection() {
     },
     {
       icon: MessageSquare,
-      title: 'Complaint Ticketing System',
-      description: 'Structured complaint management with tracking, escalation, and SLA monitoring.',
+      title: 'Service Request Workflow',
+      description: 'Structured request management with assignment, escalation, and SLA monitoring.',
     },
     {
       icon: Vote,
@@ -379,7 +379,7 @@ function PlatformSection() {
             <SectionHeader
               badge="Platform"
               title="Available Everywhere"
-              subtitle="Access GateFlux from any device. Native apps for residents and security, plus a powerful web dashboard for management."
+              subtitle="Access GateFlux from any device. Native apps for members and gate staff, plus a powerful web administration console."
               centered={false}
               light={true}
             />
@@ -419,13 +419,13 @@ function PlatformSection() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-xs text-primary-300">
-                      <CheckCircle className="h-3 w-3 text-green-400" /> Pre-approve visitors
+                      <CheckCircle className="h-3 w-3 text-green-400" /> Community announcements
                     </div>
                     <div className="flex items-center gap-2 text-xs text-primary-300">
-                      <CheckCircle className="h-3 w-3 text-green-400" /> Pay maintenance
+                      <CheckCircle className="h-3 w-3 text-green-400" /> Society payments
                     </div>
                     <div className="flex items-center gap-2 text-xs text-primary-300">
-                      <CheckCircle className="h-3 w-3 text-green-400" /> Book amenities
+                      <CheckCircle className="h-3 w-3 text-green-400" /> Service requests & amenities
                     </div>
                   </div>
                 </div>
@@ -436,13 +436,13 @@ function PlatformSection() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-xs text-primary-300">
-                      <CheckCircle className="h-3 w-3 text-green-400" /> Scan QR codes
+                      <CheckCircle className="h-3 w-3 text-green-400" /> Access control checks
                     </div>
                     <div className="flex items-center gap-2 text-xs text-primary-300">
-                      <CheckCircle className="h-3 w-3 text-green-400" /> Log deliveries
+                      <CheckCircle className="h-3 w-3 text-green-400" /> Visitor & delivery handling
                     </div>
                     <div className="flex items-center gap-2 text-xs text-primary-300">
-                      <CheckCircle className="h-3 w-3 text-green-400" /> Report incidents
+                      <CheckCircle className="h-3 w-3 text-green-400" /> Gate operations reporting
                     </div>
                   </div>
                 </div>

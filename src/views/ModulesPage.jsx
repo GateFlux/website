@@ -68,12 +68,12 @@ const categories = [
   {
     id: 'visitor',
     icon: UserCheck,
-    title: 'Visitor Management',
+    title: 'Security & Access',
     color: 'bg-green-50 text-green-600',
     modules: [
       {
-        name: 'Visitor Lifecycle',
-        description: 'Core visitor management — pre-approval, check-in/out, overstay tracking, photo/ID capture, and analytics.',
+        name: 'Access & Entry Lifecycle',
+        description: 'Access lifecycle with pre-approval, check-in/out, overstay tracking, identity capture, and operational analytics.',
         capabilities: ['Pre-approve, approve & reject', 'Guard check-in / check-out', 'Overstay detection', 'Photo & ID proof upload', 'Visitor history per unit', 'Analytics & peak hour trends'],
         platforms: ['web', 'api', 'mobile'],
       },
@@ -94,7 +94,7 @@ const categories = [
   {
     id: 'gate',
     icon: Shield,
-    title: 'Gate & Security',
+    title: 'Gate Operations',
     color: 'bg-red-50 text-red-600',
     modules: [
       {
@@ -132,12 +132,12 @@ const categories = [
   {
     id: 'helpdesk',
     icon: MessageSquare,
-    title: 'Helpdesk & Work Orders',
+    title: 'Service Requests & Work Orders',
     color: 'bg-orange-50 text-orange-600',
     modules: [
       {
-        name: 'Complaints',
-        description: 'Full helpdesk with category management, staff assignment, SLA tracking, attachments, ratings, and analytics.',
+        name: 'Service Requests',
+        description: 'Full request management with category controls, assignment, SLA tracking, attachments, ratings, and analytics.',
         capabilities: ['Raise / view / update / close complaints', 'Category & staff assignment', 'File attachments & ratings', 'SLA compliance tracking', 'Analytics & escalation heatmap'],
         platforms: ['web', 'api', 'mobile'],
       },
@@ -311,13 +311,13 @@ const categories = [
     modules: [
       {
         name: 'Operational Dashboard',
-        description: 'Real-time overview of visitor activity, security events, complaints, and financial health.',
-        capabilities: ['Live visitor & gate metrics', 'Complaint & resolution KPIs', 'Financial summary widgets', 'Recent activity feed'],
+        description: 'Real-time overview of operations, access events, service requests, and financial health.',
+        capabilities: ['Live access & gate metrics', 'Service request KPIs', 'Financial summary widgets', 'Recent activity feed'],
         platforms: ['web', 'api'],
       },
       {
-        name: 'Visitor Analytics',
-        description: 'Deep visitor traffic analysis with peak hours, purpose breakdown, and trend charts.',
+        name: 'Access Analytics',
+        description: 'Deep access-flow analysis with peak hours, purpose breakdown, and trend charts.',
         capabilities: ['Traffic trends over time', 'Purpose & provider breakdown', 'Peak hour heatmap', 'Gate-wise analysis'],
         platforms: ['web', 'api'],
       },
@@ -375,14 +375,14 @@ const categories = [
     modules: [
       {
         name: 'Resident App',
-        description: 'iOS & Android app for residents to manage visitors, payments, notices, and community features.',
-        capabilities: ['Pre-approve & approve visitors', 'Push notifications & approvals', 'Maintenance billing & payments', 'Complaints & notices', 'Amenity booking'],
+        description: 'iOS & Android app for members to manage community updates, payments, service requests, and amenities.',
+        capabilities: ['Community feed & announcements', 'Maintenance billing & payments', 'Service requests', 'Amenity booking', 'Operational alerts'],
         platforms: ['mobile'],
       },
       {
         name: 'Security Guard App',
-        description: 'Dedicated guard app for gate operations — QR scanning, walk-in entry, and shift management.',
-        capabilities: ['QR code scanning for entry', 'Manual visitor entry', 'Check-in / check-out flow', 'Photo & ID capture', 'Shift handover support'],
+        description: 'Dedicated gate app for access control, visitor check-ins, delivery handling, and shift operations.',
+        capabilities: ['Access verification', 'Manual entry', 'Check-in / check-out flow', 'Delivery handling', 'Shift handover support'],
         platforms: ['mobile'],
       },
     ],
@@ -451,11 +451,11 @@ function HeroSection() {
       <Container className="relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5 tracking-tight leading-tight">
-            Complete Platform — Every Module
+            Community Operating System — Every Module
           </h1>
           <p className="text-base md:text-lg text-primary-300 leading-relaxed mb-8 max-w-2xl mx-auto">
             GateFlux is a full-stack society management platform. Explore every module
-            across visitor management, finance, governance, security, and more.
+            across operations, finance, governance, community, and infrastructure.
           </p>
           <Link
             href="/contact"
