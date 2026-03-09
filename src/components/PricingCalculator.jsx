@@ -8,10 +8,15 @@ const PLAN_CONFIG = {
   professional: { label: 'Professional', base: 3999, perUnit: 18 },
 }
 
-export function estimateMonthlyPrice(plan, units) {
+export function estimateMonthlyPrice(plan, units, limits = {}) {
   const normalizedPlan = String(plan || 'starter').toLowerCase()
   const config = PLAN_CONFIG[normalizedPlan] || PLAN_CONFIG.starter
-  const safeUnits = Number.isFinite(Number(units)) ? Math.max(10, Math.min(2000, Number(units))) : 100
+  const minUnits = Number.isFinite(Number(limits.minUnits)) ? Number(limits.minUnits) : 10
+  const maxUnits = Number.isFinite(Number(limits.maxUnits)) ? Number(limits.maxUnits) : 2000
+  const fallbackUnits = Number.isFinite(Number(limits.fallbackUnits)) ? Number(limits.fallbackUnits) : 100
+  const safeUnits = Number.isFinite(Number(units))
+    ? Math.max(minUnits, Math.min(maxUnits, Number(units)))
+    : Math.max(minUnits, Math.min(maxUnits, fallbackUnits))
 
   return config.base + (safeUnits * config.perUnit)
 }
@@ -32,17 +37,28 @@ export default function PricingCalculator({
   const [plan, setPlan] = useState(initialPlan)
   const [units, setUnits] = useState(Math.max(minUnits, Math.min(maxUnits, Number(initialUnits) || minUnits)))
 
-  const estimatedMonthlyPrice = useMemo(() => estimateMonthlyPrice(plan, units), [plan, units])
+  const estimatedMonthlyPrice = useMemo(
+    () => estimateMonthlyPrice(plan, units, { minUnits, maxUnits, fallbackUnits: initialUnits }),
+    [plan, units, minUnits, maxUnits, initialUnits]
+  )
 
   const handlePlanChange = (nextPlan) => {
     setPlan(nextPlan)
-    onChange?.({ plan: nextPlan, units, price: estimateMonthlyPrice(nextPlan, units) })
+    onChange?.({
+      plan: nextPlan,
+      units,
+      price: estimateMonthlyPrice(nextPlan, units, { minUnits, maxUnits, fallbackUnits: initialUnits }),
+    })
   }
 
   const handleUnitsChange = (nextUnits) => {
     const safeUnits = Math.max(minUnits, Math.min(maxUnits, Number(nextUnits) || minUnits))
     setUnits(safeUnits)
-    onChange?.({ plan, units: safeUnits, price: estimateMonthlyPrice(plan, safeUnits) })
+    onChange?.({
+      plan,
+      units: safeUnits,
+      price: estimateMonthlyPrice(plan, safeUnits, { minUnits, maxUnits, fallbackUnits: initialUnits }),
+    })
   }
 
   return (
@@ -51,7 +67,9 @@ export default function PricingCalculator({
 
       <div className="space-y-5">
         <div>
-          <p className="text-sm font-medium text-primary-700 mb-2">How many units are in your society?</p>
+          <label htmlFor="pricing-units-slider" className="block text-sm font-medium text-primary-700 mb-2">
+            How many units are in your society?
+          </label>
           <input
             id="pricing-units-slider"
             type="range"
@@ -62,7 +80,11 @@ export default function PricingCalculator({
             className="w-full"
           />
           <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-3">
+            <label htmlFor="pricing-units-input" className="text-sm text-primary-700">
+              Units
+            </label>
             <input
+              id="pricing-units-input"
               type="number"
               min={minUnits}
               max={maxUnits}
@@ -102,7 +124,9 @@ export default function PricingCalculator({
 
         {showHint && (
           <p className="text-xs text-primary-500">
-            Most societies with 100 units pay around {formatCurrency(estimateMonthlyPrice('starter', 100))}/month.
+            Most societies with 100 units pay around {
+              formatCurrency(estimateMonthlyPrice('starter', 100, { minUnits, maxUnits, fallbackUnits: initialUnits }))
+            }/month.
           </p>
         )}
       </div>

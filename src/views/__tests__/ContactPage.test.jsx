@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ContactPage from '../ContactPage'
 
@@ -40,6 +40,14 @@ describe('ContactPage', () => {
 })
 
 describe('ContactForm', () => {
+  beforeAll(() => {
+    jest.useFakeTimers()
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
+  })
+
   beforeEach(() => {
     render(<ContactPage />)
   })
@@ -89,14 +97,14 @@ describe('ContactForm', () => {
   })
 
   it('updates field values on input', async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
     const nameInput = screen.getByLabelText(/full name/i)
     await user.type(nameInput, 'Jane Doe')
     expect(nameInput).toHaveValue('Jane Doe')
   })
 
   it('shows submitting state while form is being submitted', async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
 
     await user.type(screen.getByLabelText(/full name/i), 'Jane Doe')
     await user.type(screen.getByLabelText(/email address/i), 'jane@example.com')
@@ -112,7 +120,7 @@ describe('ContactForm', () => {
   })
 
   it('shows success state after form submission completes', async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
 
     await user.type(screen.getByLabelText(/full name/i), 'Jane Doe')
     await user.type(screen.getByLabelText(/email address/i), 'jane@example.com')
@@ -123,13 +131,17 @@ describe('ContactForm', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /book demo/i }))
 
-    expect(await screen.findByText(/thank you/i, {}, { timeout: 2500 })).toBeInTheDocument()
+    act(() => {
+      jest.advanceTimersByTime(1500)
+    })
+
+    expect(await screen.findByText(/thank you/i)).toBeInTheDocument()
 
     expect(screen.getByText(/we've received your request/i)).toBeInTheDocument()
   })
 
   it('resets form when "Submit another request" is clicked', async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
 
     await user.type(screen.getByLabelText(/full name/i), 'Jane Doe')
     await user.type(screen.getByLabelText(/email address/i), 'jane@example.com')
@@ -140,7 +152,11 @@ describe('ContactForm', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /book demo/i }))
 
-    expect(await screen.findByText(/thank you/i, {}, { timeout: 2500 })).toBeInTheDocument()
+    act(() => {
+      jest.advanceTimersByTime(1500)
+    })
+
+    expect(await screen.findByText(/thank you/i)).toBeInTheDocument()
 
     fireEvent.click(screen.getByText(/submit another request/i))
 

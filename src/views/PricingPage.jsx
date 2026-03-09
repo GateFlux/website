@@ -1,5 +1,3 @@
-"use client"
-
 import { Fragment } from 'react'
 import Link from 'next/link'
 import {
@@ -358,7 +356,7 @@ function ExamplePricingSection() {
 
     return {
       units,
-      estimated_monthly: estimateMonthlyPrice(plan, units),
+      estimatedMonthly: estimateMonthlyPrice(plan, units),
     }
   })
 
@@ -387,7 +385,7 @@ function ExamplePricingSection() {
                     <tr key={row.units} className="border-t border-primary-100">
                       <td className="px-4 py-3 text-sm text-primary-700">{row.units} units</td>
                       <td className="px-4 py-3 text-sm font-semibold text-primary-900">
-                        ₹{Math.round(row.estimated_monthly).toLocaleString('en-IN')}
+                        ₹{Math.round(row.estimatedMonthly).toLocaleString('en-IN')}
                       </td>
                     </tr>
                   ))}
