@@ -1,21 +1,36 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ContactPage from '../ContactPage'
 
 // Mock lucide-react icons to avoid SVG rendering issues in tests
 jest.mock('lucide-react', () => {
   const Icon = ({ className }) => <svg className={className} />
+  Icon.displayName = 'MockIcon'
   return new Proxy({}, { get: () => Icon })
 })
 
 // Mock sub-components that aren't under test
-jest.mock('../../components/Container', () => ({ children, className }) => (
-  <div className={className}>{children}</div>
-))
-jest.mock('../../components/SectionHeader', () => () => <div data-testid="section-header" />)
-jest.mock('../../components/FAQ', () => ({ items }) => (
-  <ul>{items.map((item) => <li key={item.question}>{item.question}</li>)}</ul>
-))
+jest.mock('../../components/Container', () => {
+  const MockContainer = ({ children, className }) => (
+    <div className={className}>{children}</div>
+  )
+  MockContainer.displayName = 'MockContainer'
+  return MockContainer
+})
+
+jest.mock('../../components/SectionHeader', () => {
+  const MockSectionHeader = () => <div data-testid="section-header" />
+  MockSectionHeader.displayName = 'MockSectionHeader'
+  return MockSectionHeader
+})
+
+jest.mock('../../components/FAQ', () => {
+  const MockFaq = ({ items }) => (
+    <ul>{items.map((item) => <li key={item.question}>{item.question}</li>)}</ul>
+  )
+  MockFaq.displayName = 'MockFaq'
+  return MockFaq
+})
 
 describe('ContactPage', () => {
   it('renders the contact form', () => {
@@ -25,14 +40,16 @@ describe('ContactPage', () => {
 })
 
 describe('ContactForm', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     jest.useFakeTimers()
-    render(<ContactPage />)
   })
 
-  afterEach(() => {
-    jest.runOnlyPendingTimers()
+  afterAll(() => {
     jest.useRealTimers()
+  })
+
+  beforeEach(() => {
+    render(<ContactPage />)
   })
 
   it('renders all required form fields', () => {
@@ -93,12 +110,13 @@ describe('ContactForm', () => {
     await user.type(screen.getByLabelText(/email address/i), 'jane@example.com')
     await user.type(screen.getByLabelText(/phone number/i), '+91 91210 92479')
     await user.type(screen.getByLabelText(/community name/i), 'Test Apartments')
+    fireEvent.change(screen.getByLabelText(/number of units/i), { target: { value: '51-100' } })
+    fireEvent.change(screen.getByLabelText(/role/i), { target: { value: 'committee' } })
 
     const submitButton = screen.getByRole('button', { name: /book demo/i })
     fireEvent.click(submitButton)
 
-    expect(screen.getByText(/submitting/i)).toBeInTheDocument()
-    expect(submitButton).toBeDisabled()
+    expect(screen.getByRole('button', { name: /submitting/i })).toBeDisabled()
   })
 
   it('shows success state after form submission completes', async () => {
@@ -108,17 +126,16 @@ describe('ContactForm', () => {
     await user.type(screen.getByLabelText(/email address/i), 'jane@example.com')
     await user.type(screen.getByLabelText(/phone number/i), '+91 91210 92479')
     await user.type(screen.getByLabelText(/community name/i), 'Test Apartments')
+    fireEvent.change(screen.getByLabelText(/number of units/i), { target: { value: '51-100' } })
+    fireEvent.change(screen.getByLabelText(/role/i), { target: { value: 'committee' } })
 
     fireEvent.click(screen.getByRole('button', { name: /book demo/i }))
 
-    // Fast-forward past the 1500ms simulated delay
-    await waitFor(() => {
+    act(() => {
       jest.advanceTimersByTime(1500)
     })
 
-    await waitFor(() => {
-      expect(screen.getByText(/thank you/i)).toBeInTheDocument()
-    })
+    expect(await screen.findByText(/thank you/i)).toBeInTheDocument()
 
     expect(screen.getByText(/we've received your request/i)).toBeInTheDocument()
   })
@@ -127,16 +144,19 @@ describe('ContactForm', () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
 
     await user.type(screen.getByLabelText(/full name/i), 'Jane Doe')
+    await user.type(screen.getByLabelText(/email address/i), 'jane@example.com')
+    await user.type(screen.getByLabelText(/phone number/i), '+91 91210 92479')
+    await user.type(screen.getByLabelText(/community name/i), 'Test Apartments')
+    fireEvent.change(screen.getByLabelText(/number of units/i), { target: { value: '51-100' } })
+    fireEvent.change(screen.getByLabelText(/role/i), { target: { value: 'committee' } })
 
     fireEvent.click(screen.getByRole('button', { name: /book demo/i }))
 
-    await waitFor(() => {
+    act(() => {
       jest.advanceTimersByTime(1500)
     })
 
-    await waitFor(() => {
-      expect(screen.getByText(/thank you/i)).toBeInTheDocument()
-    })
+    expect(await screen.findByText(/thank you/i)).toBeInTheDocument()
 
     fireEvent.click(screen.getByText(/submit another request/i))
 

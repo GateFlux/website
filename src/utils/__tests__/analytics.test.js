@@ -22,10 +22,7 @@ describe('analytics module', () => {
     // Reset dataLayer and window properties before each test
     delete window.dataLayer
     Object.defineProperty(window, 'innerWidth', { value: 1280, writable: true })
-    Object.defineProperty(window, 'location', {
-      value: { pathname: '/test' },
-      writable: true,
-    })
+    window.history.pushState({}, '', '/test')
   })
 
   describe('pushToDataLayer', () => {

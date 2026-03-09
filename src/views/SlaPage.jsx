@@ -56,7 +56,7 @@ function UptimeSection() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Standard Plans</span>
-                <p className="text-xs text-neutral-400 mt-0.5">Basic · Essential · Professional</p>
+                <p className="text-xs text-neutral-400 mt-0.5">Starter · Growth · Professional</p>
               </div>
               <Server className="h-6 w-6 text-primary-300" />
             </div>
@@ -230,7 +230,7 @@ function CreditsSection() {
           <div>
             <h3 className="text-base font-semibold text-primary-900 mb-4 flex items-center gap-2">
               <Server className="h-4 w-4 text-primary-400" />
-              Standard Plan (99.5% SLA)
+              Starter / Growth / Professional (99.5% SLA)
             </h3>
             <div className="overflow-hidden rounded-xl border border-neutral-200">
               <table className="w-full text-sm">

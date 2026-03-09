@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import Container from '../components/Container'
 import FAQ from '../components/FAQ'
+import PricingCalculator, { estimateMonthlyPrice } from '../components/PricingCalculator'
 
 // Hero Section
 function HeroSection() {
@@ -55,7 +56,7 @@ function HeroSection() {
           </div>
           
           <p className="text-sm text-primary-400">
-            Annual subscription model • Minimum unit commitment applies
+            Unit-based SaaS pricing • Monthly, yearly, and 2-year billing options
           </p>
         </div>
       </Container>
@@ -120,10 +121,8 @@ function PhilosophySection() {
 
 // Plan Card Component
 function PlanCard({ plan }) {
-  const isEnterprise = plan.priceMonthly === null
-  const yearlySaving = plan.priceMonthly
-    ? Math.round(((plan.priceMonthly * 12 - plan.priceYearly) / (plan.priceMonthly * 12)) * 100)
-    : 0
+  const isEnterprise = plan.startingPrice === null
+  const isFree = plan.slug === 'free'
 
   return (
     <div
@@ -157,32 +156,24 @@ function PlanCard({ plan }) {
             <p className="text-2xl font-bold text-primary-900 mb-1">Custom Pricing</p>
             <p className="text-sm text-primary-500">Unlimited units & users</p>
           </div>
+        ) : isFree ? (
+          <div>
+            <div className="text-3xl font-bold text-primary-900 mb-1">₹0</div>
+            <p className="text-sm text-primary-600">Up to 25 units</p>
+          </div>
         ) : (
           <div>
-            <div className="flex items-end gap-1 mb-1">
-              <span className="text-3xl font-bold text-primary-900">
-                ₹{plan.priceMonthly.toLocaleString('en-IN')}
-              </span>
-              <span className="text-primary-500 text-sm mb-1">/month</span>
+            <div className="text-3xl font-bold text-primary-900 mb-1">
+              Starts at ₹{plan.startingPrice.toLocaleString('en-IN')} / month
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm text-primary-600">
-                ₹{plan.priceYearly.toLocaleString('en-IN')}/year
-              </span>
-              {yearlySaving > 0 && (
-                <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                  Save {yearlySaving}% annually
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-primary-500 mt-2">
-              Up to {plan.maxUnits.toLocaleString('en-IN')} units · {plan.maxUsers.toLocaleString('en-IN')} users
-            </p>
+            <p className="text-sm text-primary-600">{plan.priceNote}</p>
           </div>
         )}
-        <p className="text-sm text-primary-500 mt-2">
-          {plan.trialDays}-day free trial included
-        </p>
+        {plan.trialDays > 0 && (
+          <p className="text-sm text-primary-500 mt-2">
+            {plan.trialDays}-day free trial included
+          </p>
+        )}
       </div>
 
       <div className="flex-grow mb-6">
@@ -217,94 +208,112 @@ function PlanCard({ plan }) {
 function PlansSection() {
   const plans = [
     {
-      name: 'Starter',
-      slug: 'basic',
+      name: 'Free',
+      slug: 'free',
       icon: Building2,
-      tagline: 'Perfect for small societies getting started',
-      priceMonthly: 1999,
-      priceYearly: 19190,
-      maxUnits: 50,
-      maxUsers: 150,
-      trialDays: 14,
+      tagline: 'Up to 25 units',
+      startingPrice: 0,
+      priceNote: 'Up to 25 units',
+      maxUnits: 25,
+      maxUsers: 1,
+      trialDays: 0,
       features: [
-        'Visitor Management & Check-in/out',
-        'QR Code Entry System',
-        'Notices & Announcements',
-        'Complaint Management',
-        'Security Guard App',
-        'Role-Based Access Control',
-        'Basic Reports',
+        'Visitor management',
+        'Complaints tracking',
+        'Announcements',
+      ],
+      cta: 'Start Free',
+      highlighted: false,
+    },
+    {
+      name: 'Starter',
+      slug: 'starter',
+      icon: Building2,
+      tagline: 'Best for small societies.',
+      startingPrice: 999,
+      priceNote: 'Final price depends on the number of units in your society.',
+      maxUnits: 100,
+      maxUsers: 3,
+      trialDays: 30,
+      features: [
+        'Resident management',
+        'Visitor management & security gate entry',
+        'Announcements and notice board',
+        'Complaint and ticket tracking',
+        'Parcel and vehicle records',
+        'Resident and security mobile apps',
+        'Admin panel access',
       ],
       cta: 'Start Free Trial',
       highlighted: false,
     },
     {
       name: 'Essential',
-      slug: 'standard',
+      slug: 'essential',
       icon: Users,
-      tagline: 'Everything you need for a well-run society',
-      priceMonthly: 5000,
-      priceYearly: 48000,
-      maxUnits: 500,
-      maxUsers: 1500,
-      trialDays: 14,
+      tagline: 'Ideal for growing residential communities.',
+      startingPrice: 1999,
+      priceNote: 'Final monthly amount scales with your total units.',
+      maxUnits: 300,
+      maxUsers: 8,
+      trialDays: 30,
       includesLabel: 'Everything in Starter, plus',
       features: [
-        'Maintenance Billing & Online Payments',
-        'Amenity Booking & Management',
-        'Staff & Shift Management',
-        'Package / Parcel Tracking',
-        'Vehicle Registration & Verification',
-        'Recurring Visitor Management',
-        'Vendor Management',
-      ],
-      cta: 'Start Free Trial',
-      highlighted: false,
-    },
-    {
-      name: 'Professional',
-      slug: 'professional',
-      icon: Landmark,
-      tagline: 'Advanced tools for large communities',
-      priceMonthly: 12000,
-      priceYearly: 115200,
-      maxUnits: 2000,
-      maxUsers: 6000,
-      trialDays: 14,
-      includesLabel: 'Everything in Essential, plus',
-      features: [
-        'Work Orders & Maintenance Tracking',
-        'Advanced Analytics & Dashboards',
-        'Society Accounting',
-        'Community Features (Events, Polls)',
-        'Governance & Board Elections',
-        'Two-Factor Authentication (2FA)',
-        'Audit Logs & Activity Tracking',
+        'Maintenance billing and collections',
+        'Online payments (UPI/cards) and invoices',
+        'Late fee automation',
+        'Document repository',
+        'Amenity and parking management',
+        'Staff management',
+        'Advanced reports, SMS, and audit logs',
       ],
       cta: 'Start Free Trial',
       highlighted: true,
     },
     {
+      name: 'Professional',
+      slug: 'professional',
+      icon: Landmark,
+      tagline: 'Advanced tools for large societies.',
+      startingPrice: 3999,
+      priceNote: 'Built for larger societies with advanced operations needs.',
+      maxUnits: 1000,
+      maxUsers: 20,
+      trialDays: 30,
+      includesLabel: 'Everything in Essential, plus',
+      features: [
+        'Accounting integrations',
+        'Vendor and asset management',
+        'Multi-tower operations',
+        'Smart visitor pre-approval and delivery flow',
+        'Event management, polls, and voting',
+        'Analytics dashboard and API access',
+        'WhatsApp notifications',
+      ],
+      cta: 'Start Free Trial',
+      highlighted: false,
+    },
+    {
       name: 'Enterprise',
       slug: 'enterprise',
       icon: Server,
-      tagline: 'Unlimited power for property management firms',
-      priceMonthly: null,
-      priceYearly: null,
+      tagline: 'For large gated communities and builders',
+      startingPrice: null,
+      priceNote: 'Custom deployment, integrations, and support scope.',
       maxUnits: null,
       maxUsers: null,
       trialDays: 30,
       includesLabel: 'Everything in Professional, plus',
       features: [
-        'White-Label Branding',
-        'Advanced Integrations',
-        'Single Sign-On (SSO)',
-        'Multi-Property Dashboard',
-        'Dedicated Account Manager',
-        'Priority Support & SLA',
-        'Custom Integrations',
+        'Multi-society management',
+        'White-label mobile apps',
+        'Custom integrations and SSO',
+        'Dedicated infrastructure',
+        'SLA uptime guarantee',
+        'Priority support and custom reporting',
+        'Builder dashboards and export tooling',
       ],
-      cta: 'Request Enterprise Proposal',
+      cta: 'Contact Sales',
       highlighted: false,
     },
   ]
@@ -317,19 +326,76 @@ function PlansSection() {
             Subscription Plans
           </h2>
           <p className="text-primary-600 max-w-2xl mx-auto">
-            Choose the plan that fits your community size. All plans include a free trial and can be cancelled anytime.
+            Choose a plan by society size with simple starts-at pricing.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 xl:grid-cols-5 gap-5 max-w-7xl mx-auto">
           {plans.map((plan) => (
             <PlanCard key={plan.name} plan={plan} />
           ))}
         </div>
 
         <p className="text-center text-sm text-primary-500 mt-6">
-          All prices in INR · GST applicable · Annual billing saves 20%
+          All prices in INR · GST applicable · Yearly billing saves 15%
         </p>
+      </Container>
+    </section>
+  )
+}
+
+function ExamplePricingSection() {
+  const selectPlanByUnits = (units) => {
+    if (units <= 100) return 'starter'
+    if (units <= 300) return 'essential'
+    return 'professional'
+  }
+
+  const examples = [50, 100, 200, 500].map((units) => {
+    const plan = selectPlanByUnits(units)
+
+    return {
+      units,
+      estimatedMonthly: estimateMonthlyPrice(plan, units),
+    }
+  })
+
+  return (
+    <section className="section-padding bg-white border-t border-primary-100">
+      <Container>
+        <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-4 tracking-tight">
+              Example Pricing
+            </h2>
+            <p className="text-primary-600 mb-5">
+              Illustrative monthly estimates based on society size.
+            </p>
+
+            <div className="overflow-hidden rounded-xl border border-primary-200">
+              <table className="w-full">
+                <thead className="bg-primary-50">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-sm font-semibold text-primary-700">Society Size</th>
+                    <th className="text-left px-4 py-3 text-sm font-semibold text-primary-700">Estimated Monthly Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {examples.map((row) => (
+                    <tr key={row.units} className="border-t border-primary-100">
+                      <td className="px-4 py-3 text-sm text-primary-700">{row.units} units</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-primary-900">
+                        ₹{Math.round(row.estimatedMonthly).toLocaleString('en-IN')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <PricingCalculator />
+        </div>
       </Container>
     </section>
   )
@@ -337,80 +403,98 @@ function PlansSection() {
 
 // Feature Comparison Table
 function ComparisonTableSection() {
-  const plans = ['Starter', 'Essential', 'Professional', 'Enterprise']
+  const plans = ['Free', 'Starter', 'Essential', 'Professional', 'Enterprise']
 
   // null = custom/unlimited, number = limit, true/false = included/not
   const scaleRows = [
-    { label: 'Residential Units',   values: ['Up to 50', 'Up to 500', 'Up to 2,000', 'Unlimited'] },
-    { label: 'User Accounts',        values: ['Up to 150', 'Up to 1,500', 'Up to 6,000', 'Unlimited'] },
-    { label: 'Free Trial',           values: ['14 days', '14 days', '14 days', '30 days'] },
+    { label: 'Residential Units', values: ['Up to 25', 'Hybrid', 'Hybrid', 'Hybrid', 'Custom'] },
+    { label: 'Starting Price / Month', values: ['₹0', 'Starts at ₹999', 'Starts at ₹1,999', 'Starts at ₹3,999', 'Custom'] },
+    { label: 'Free Trial', values: ['-', '30 days', '30 days', '30 days', '30 days'] },
   ]
 
   const categories = [
     {
       title: 'Core Operations',
       rows: [
-        { label: 'Visitor Management & Check-in/out', values: [true, true, true, true] },
-        { label: 'QR Code Entry System',              values: [true, true, true, true] },
-        { label: 'Notices & Announcements',            values: [true, true, true, true] },
-        { label: 'Complaint Management',               values: [true, true, true, true] },
-        { label: 'Recurring Visitor Management',       values: [false, true, true, true] },
-        { label: 'Package / Parcel Tracking',          values: [false, true, true, true] },
-        { label: 'Vehicle Registration',               values: [false, true, true, true] },
+        { label: 'Resident Management',               values: [false, true, true, true, true] },
+        { label: 'Visitor Management & Check-in/out', values: [true, true, true, true, true] },
+        { label: 'QR Code Entry System',              values: [false, true, true, true, true] },
+        { label: 'Notices & Announcements',           values: [true, true, true, true, true] },
+        { label: 'Complaint Management',              values: [true, true, true, true, true] },
+        { label: 'Recurring Visitor Management',      values: [false, false, false, true, true] },
+        { label: 'Smart Visitor Pre-Approval & Delivery Flow', values: [false, false, false, true, true] },
+        { label: 'Package / Parcel Tracking',         values: [false, true, true, true, true] },
+        { label: 'Vehicle Registration',              values: [false, true, true, true, true] },
+        { label: 'Resident & Security Mobile Apps',   values: [false, true, true, true, true] },
+        { label: 'Admin Panel Access',                values: [false, true, true, true, true] },
+        { label: 'Multi-Tower Operations',            values: [false, false, false, true, true] },
       ],
     },
     {
       title: 'Finance & Billing',
       rows: [
-        { label: 'Maintenance Billing & Payments',     values: [false, true, true, true] },
-        { label: 'Society Accounting',                 values: [false, false, true, true] },
-        { label: 'Vendor Payments',                    values: [false, false, true, true] },
+        { label: 'Maintenance Billing & Payments',     values: [false, false, true, true, true] },
+        { label: 'Online Payments (UPI/cards) & Invoices', values: [false, false, true, true, true] },
+        { label: 'Late Fee Automation',                values: [false, false, true, true, true] },
+        { label: 'Society Accounting',                 values: [false, false, false, true, true] },
+        { label: 'Vendor Payments',                    values: [false, false, false, true, true] },
+        { label: 'Accounting Integrations',            values: [false, false, false, true, true] },
       ],
     },
     {
       title: 'Facilities & Staff',
       rows: [
-        { label: 'Amenity Booking & Management',       values: [false, true, true, true] },
-        { label: 'Staff & Shift Management',           values: [false, true, true, true] },
-        { label: 'Vendor Management',                  values: [false, true, true, true] },
-        { label: 'Work Orders & Maintenance Tracking', values: [false, false, true, true] },
+        { label: 'Amenity Booking & Management',       values: [false, false, true, true, true] },
+        { label: 'Amenity & Parking Management',       values: [false, false, true, true, true] },
+        { label: 'Staff & Shift Management',           values: [false, false, true, true, true] },
+        { label: 'Vendor Management',                  values: [false, false, false, true, true] },
+        { label: 'Vendor & Asset Management',          values: [false, false, false, true, true] },
+        { label: 'Work Orders & Maintenance Tracking', values: [false, false, false, true, true] },
       ],
     },
     {
       title: 'Community & Governance',
       rows: [
-        { label: 'Events, Polls & Surveys',            values: [false, false, true, true] },
-        { label: 'Governance & Board Elections',       values: [false, false, true, true] },
-        { label: 'Document Management',                values: [false, false, true, true] },
+        { label: 'Events, Polls & Surveys',            values: [false, false, false, true, true] },
+        { label: 'Governance & Board Elections',       values: [false, false, false, true, true] },
+        { label: 'Document Repository',                values: [false, false, true, true, true] },
       ],
     },
     {
       title: 'Analytics & Reports',
       rows: [
-        { label: 'Basic Reports',                      values: [true, true, true, true] },
-        { label: 'Advanced Analytics & Dashboards',    values: [false, false, true, true] },
-        { label: 'Advanced Reports & Exports',         values: [false, false, true, true] },
-        { label: 'Custom Report Builder',              values: [false, false, false, true] },
+        { label: 'Basic Reports',                      values: [false, true, true, true, true] },
+        { label: 'Advanced Analytics & Dashboards',    values: [false, false, false, true, true] },
+        { label: 'Advanced Reports & Exports',         values: [false, false, true, true, true] },
+        { label: 'Custom Reporting',                   values: [false, false, false, false, true] },
+        { label: 'Custom Report Builder',              values: [false, false, false, false, true] },
+        { label: 'API Access',                         values: [false, false, false, true, true] },
       ],
     },
     {
       title: 'Security & Compliance',
       rows: [
-        { label: 'Role-Based Access Control',          values: [true, true, true, true] },
-        { label: 'Audit Logs & Activity Tracking',     values: [false, false, true, true] },
-        { label: 'Two-Factor Authentication (2FA)',     values: [false, false, true, true] },
-        { label: 'Single Sign-On (SSO)',               values: [false, false, false, true] },
+        { label: 'Role-Based Access Control',          values: [false, true, true, true, true] },
+        { label: 'Audit Logs & Activity Tracking',     values: [false, false, true, true, true] },
+        { label: 'SMS Notifications',                  values: [false, false, true, true, true] },
+        { label: 'Two-Factor Authentication (2FA)',    values: [false, false, false, true, true] },
+        { label: 'WhatsApp Notifications',             values: [false, false, false, true, true] },
+        { label: 'Single Sign-On (SSO)',               values: [false, false, false, false, true] },
       ],
     },
     {
       title: 'Enterprise & Platform',
       rows: [
-        { label: 'Advanced Integrations',              values: [false, false, false, true] },
-        { label: 'White-Label Branding',               values: [false, false, false, true] },
-        { label: 'Multi-Property Dashboard',           values: [false, false, false, true] },
-        { label: 'Custom Integrations',                values: [false, false, false, true] },
-        { label: 'Dedicated Account Manager',          values: [false, false, false, true] },
-        { label: 'Priority Support & SLA',             values: [false, false, false, true] },
+        { label: 'Advanced Integrations',              values: [false, false, false, false, true] },
+        { label: 'White-Label Mobile Apps',            values: [false, false, false, false, true] },
+        { label: 'Multi-Property Dashboard',           values: [false, false, false, false, true] },
+        { label: 'Multi-Society Management',           values: [false, false, false, false, true] },
+        { label: 'Custom Integrations',                values: [false, false, false, false, true] },
+        { label: 'Dedicated Infrastructure',           values: [false, false, false, false, true] },
+        { label: 'Builder Dashboards & Export Tooling', values: [false, false, false, false, true] },
+        { label: 'Dedicated Account Manager',          values: [false, false, false, false, true] },
+        { label: 'SLA Uptime Guarantee',               values: [false, false, false, false, true] },
+        { label: 'Priority Support & SLA',             values: [false, false, false, false, true] },
       ],
     },
   ]
@@ -461,7 +545,7 @@ function ComparisonTableSection() {
             <tbody>
               {/* Scale rows */}
               <tr>
-                <td colSpan={5} className="px-5 py-2 bg-primary-50 text-xs font-semibold text-primary-500 uppercase tracking-wider">
+                <td colSpan={plans.length + 1} className="px-5 py-2 bg-primary-50 text-xs font-semibold text-primary-500 uppercase tracking-wider">
                   Scale & Limits
                 </td>
               </tr>
@@ -480,7 +564,7 @@ function ComparisonTableSection() {
               {categories.map((cat) => (
                 <Fragment key={cat.title}>
                   <tr>
-                    <td colSpan={5} className="px-5 py-2 bg-primary-50 text-xs font-semibold text-primary-500 uppercase tracking-wider">
+                    <td colSpan={plans.length + 1} className="px-5 py-2 bg-primary-50 text-xs font-semibold text-primary-500 uppercase tracking-wider">
                       {cat.title}
                     </td>
                   </tr>
@@ -511,12 +595,12 @@ function ComparisonTableSection() {
                       className={`inline-block text-xs font-semibold px-4 py-2 rounded-lg transition-colors ${
                         i === 2
                           ? 'bg-accent-500 text-white hover:bg-accent-600'
-                          : i === 3
+                          : i === 4
                           ? 'bg-primary-900 text-white hover:bg-primary-800'
                           : 'bg-primary-100 text-primary-800 hover:bg-primary-200'
                       }`}
                     >
-                      {i === 3 ? 'Contact Us' : 'Try Free'}
+                      {i === 4 ? 'Contact Us' : 'Try Free'}
                     </Link>
                   </td>
                 ))}
@@ -526,7 +610,7 @@ function ComparisonTableSection() {
         </div>
 
         <p className="text-center text-xs text-primary-400 mt-4">
-          All prices in INR · GST applicable · ★ Most Popular
+          All prices in INR · GST applicable.
         </p>
       </Container>
     </section>
@@ -537,20 +621,36 @@ function ComparisonTableSection() {
 function AddOnsSection() {
   const addOns = [
     {
-      name: 'Advanced Analytics',
-      description: 'Detailed operational insights with custom dashboards and trend analysis.',
+      name: 'SMS notifications',
+      description: 'Pay per SMS based on monthly usage.',
     },
     {
-      name: 'Builder Portfolio Dashboard',
-      description: 'Centralized oversight across multiple communities and projects.',
+      name: 'WhatsApp notifications',
+      description: 'Rs0.80 per message.',
     },
     {
-      name: 'Dedicated SLA Support',
-      description: 'Priority response times with assigned support representative.',
+      name: 'Extra admin users',
+      description: 'Rs199 per admin/month.',
     },
     {
-      name: 'Custom Integration Services',
-      description: 'ERP, accounting, and third-party system integrations.',
+      name: 'Extra security device',
+      description: 'Rs299 per device/month.',
+    },
+    {
+      name: 'Additional storage',
+      description: 'Rs299 per 10GB/month.',
+    },
+    {
+      name: 'Custom reports',
+      description: 'Rs999/month.',
+    },
+    {
+      name: 'Data migration',
+      description: 'Rs5000 one-time onboarding service.',
+    },
+    {
+      name: 'Onboarding assistance',
+      description: 'Rs3000 one-time setup support.',
     },
   ]
 
@@ -580,7 +680,7 @@ function AddOnsSection() {
           </div>
           
           <p className="text-center text-sm text-primary-500 mt-6">
-            Available for Professional and Enterprise plans. Contact us for pricing.
+            Add-ons can be applied on any paid plan based on operational requirements.
           </p>
         </div>
       </Container>
@@ -674,14 +774,14 @@ function CommitmentSection() {
             
             <div className="grid sm:grid-cols-2 gap-6 max-w-lg mx-auto">
               <div className="bg-white rounded-lg p-5 border border-primary-200 text-center">
-                <p className="text-sm font-medium text-primary-600 mb-2">2-Year Commitment</p>
-                <p className="text-2xl font-bold text-primary-900">8%</p>
-                <p className="text-sm text-primary-500">rate reduction</p>
+                <p className="text-sm font-medium text-primary-600 mb-2">Yearly Billing</p>
+                <p className="text-2xl font-bold text-primary-900">15%</p>
+                <p className="text-sm text-primary-500">discount</p>
               </div>
               <div className="bg-white rounded-lg p-5 border border-primary-200 text-center">
-                <p className="text-sm font-medium text-primary-600 mb-2">3-Year Commitment</p>
-                <p className="text-2xl font-bold text-primary-900">12%</p>
-                <p className="text-sm text-primary-500">rate reduction</p>
+                <p className="text-sm font-medium text-primary-600 mb-2">2-Year Billing</p>
+                <p className="text-2xl font-bold text-primary-900">25%</p>
+                <p className="text-sm text-primary-500">discount</p>
               </div>
             </div>
             
@@ -708,7 +808,7 @@ function FAQSection() {
     },
     {
       question: 'Are annual contracts required?',
-      answer: 'Annual subscription is the standard model for GateFlux. Multi-year commitments are available for communities seeking long-term rate stability and additional support benefits.',
+      answer: 'No. You can start monthly, then move to yearly (15% discount) or 2-year billing (25% discount) for better pricing efficiency.',
     },
     {
       question: 'Is pricing negotiable?',
@@ -716,7 +816,7 @@ function FAQSection() {
     },
     {
       question: 'What payment methods are accepted?',
-      answer: 'We accept bank transfers, cheques, and digital payment methods. Annual billing is standard, with quarterly options available for Enterprise plans upon request.',
+      answer: 'We accept bank transfers, cheques, and digital payment methods. Monthly billing is available, with 15% yearly and 25% two-year discounts.',
     },
     {
       question: 'What happens after the contract period?',
@@ -817,6 +917,7 @@ export default function PricingPage() {
       <HeroSection />
       <PhilosophySection />
       <PlansSection />
+      <ExamplePricingSection />
       <ComparisonTableSection />
       <AddOnsSection />
       <ImplementationSection />

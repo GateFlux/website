@@ -47,13 +47,12 @@ function HeroSection() {
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-6">
-              Digital Infrastructure for{' '}
-              <span className="text-primary-200">Residential Governance</span>
+              Run your entire residential society from{' '}
+              <span className="text-primary-200">one platform.</span>
             </h1>
             
             <p className="text-base md:text-lg text-primary-300 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              GateFlux unifies residents, security, and management into one secure, 
-              controlled ecosystem designed for high-performance residential communities.
+              GateFlux brings security, finance, governance, and community management together in one modern system.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -61,14 +60,14 @@ function HeroSection() {
                 href="/contact"
                 className="btn-primary-lg"
               >
-                Book Enterprise Demo
+                Start Free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link
-                href="/features"
+                href="/contact"
                 className="btn-outline px-8 py-4"
               >
-                Explore Platform
+                Book Demo
               </Link>
             </div>
 
@@ -101,15 +100,15 @@ function HeroSection() {
                   {/* Stats Row */}
                   <div className="grid grid-cols-3 gap-3">
                     <div className="bg-primary-900 border border-primary-700 rounded p-3">
-                      <p className="text-xs text-primary-500 uppercase tracking-wide">Visitors Today</p>
+                      <p className="text-xs text-primary-500 uppercase tracking-wide">Collections Today</p>
                       <p className="text-xl font-semibold text-white mt-1">247</p>
                     </div>
                     <div className="bg-primary-900 border border-primary-700 rounded p-3">
-                      <p className="text-xs text-primary-500 uppercase tracking-wide">Pending</p>
+                      <p className="text-xs text-primary-500 uppercase tracking-wide">Outstanding</p>
                       <p className="text-xl font-semibold text-accent-500 mt-1">12</p>
                     </div>
                     <div className="bg-primary-900 border border-primary-700 rounded p-3">
-                      <p className="text-xs text-primary-500 uppercase tracking-wide">Active Issues</p>
+                      <p className="text-xs text-primary-500 uppercase tracking-wide">Service Requests</p>
                       <p className="text-xl font-semibold text-white mt-1">8</p>
                     </div>
                   </div>
@@ -119,17 +118,17 @@ function HeroSection() {
                     <div className="flex items-center gap-3 text-sm">
                       <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
                       <span className="text-primary-300 font-mono text-xs">14:23</span>
-                      <span className="text-primary-200">Visitor approved — Tower A</span>
+                      <span className="text-primary-200">Auto invoice batch generated — Tower A</span>
                     </div>
                     <div className="flex items-center gap-3 text-sm">
                       <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
                       <span className="text-primary-300 font-mono text-xs">14:18</span>
-                      <span className="text-primary-200">Delivery logged — Amazon</span>
+                      <span className="text-primary-200">Amenity slot utilization updated</span>
                     </div>
                     <div className="flex items-center gap-3 text-sm">
                       <div className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
                       <span className="text-primary-300 font-mono text-xs">14:12</span>
-                      <span className="text-primary-200">Maintenance ticket #847 raised</span>
+                      <span className="text-primary-200">Committee vote cycle opened</span>
                     </div>
                   </div>
                 </div>
@@ -209,7 +208,7 @@ function TrustSection() {
 // Problem Section
 function ProblemSection() {
   const painPoints = [
-    'Manual visitor logs at the gate',
+    'Manual tracking across finance and operations',
     'Unstructured communication via messaging apps',
     'Delayed complaint resolution',
     'Limited financial transparency',
@@ -272,19 +271,19 @@ function SolutionSection() {
   const pillars = [
     {
       icon: Shield,
-      title: 'Visitor & Security Operations',
-      description: 'Complete control over who enters your community with pre-approvals, QR codes, and real-time tracking.',
-      features: ['Pre-approved entries', 'QR/OTP verification', 'Delivery tracking', 'Vehicle logging'],
+      title: 'Society Operations',
+      description: 'Run day-to-day operations from one control layer with service workflows, access control, and automated monitoring.',
+      features: ['Access workflows', 'Delivery handling', 'Service tracking', 'Operational visibility'],
     },
     {
       icon: Users,
-      title: 'Community Communication & Engagement',
+      title: 'Governance & Community',
       description: 'Keep everyone connected with instant broadcasts, notice boards, and seamless community engagement.',
       features: ['Digital notice board', 'Event announcements', 'Polls & voting', 'Emergency SOS alerts'],
     },
     {
       icon: CreditCard,
-      title: 'Financial & Administrative Management',
+      title: 'Finance & Administration',
       description: 'Transparent financial management with automated billing, payment tracking, and detailed reports.',
       features: ['Auto billing', 'Online payments', 'Expense tracking', 'Audit logs'],
     },
@@ -331,14 +330,14 @@ function SolutionSection() {
 // Feature Highlights Section
 function FeatureHighlightsSection() {
   const features = [
-    { icon: UserCheck, title: 'Pre-approved Entries', description: 'Pre-approve visitor entries before arrival.' },
+    { icon: UserCheck, title: 'Security & Access', description: 'Manage visitor and entry workflows with policy controls.' },
     { icon: QrCode, title: 'QR & OTP Verification', description: 'Seamless entry with QR codes and OTP validation.' },
     { icon: Truck, title: 'Delivery Tracking', description: 'Track deliveries and service personnel.' },
     { icon: Wrench, title: 'Domestic Help Registry', description: 'Registry with access controls for regular staff.' },
     { icon: Building, title: 'Vehicle Logging', description: 'Complete vehicle entry and exit tracking.' },
     { icon: Bell, title: 'Digital Notice Board', description: 'Instant community-wide announcements.' },
     { icon: Calendar, title: 'Event Announcements', description: 'Manage and broadcast community events.' },
-    { icon: MessageSquare, title: 'Complaint Management', description: 'Structured workflow for issue resolution.' },
+    { icon: MessageSquare, title: 'Service Requests', description: 'Structured workflow for issue resolution and assignments.' },
     { icon: FileText, title: 'Polls & Voting', description: 'Community decisions made transparent.' },
     { icon: Shield, title: 'Emergency SOS Alerts', description: 'Instant emergency notifications.' },
   ]
@@ -380,19 +379,19 @@ function FeatureHighlightsSection() {
 // Mobile Experience Section
 function MobileExperienceSection() {
   const residentFeatures = [
-    'Approve visitors in real time',
-    'Track deliveries',
+    'Community updates and announcements',
+    'Track society payments',
     'Raise and monitor service requests',
-    'Make maintenance payments',
-    'Receive instant alerts',
+    'Book amenities and facilities',
+    'Receive governance and finance alerts',
   ]
 
   const securityFeatures = [
-    'Scan QR entries',
-    'Verify OTP access',
-    'Log visitors and deliveries',
-    'Track frequent entries',
-    'Receive management instructions',
+    'Access control workflows',
+    'Visitor check-ins and verification',
+    'Delivery handling at gate',
+    'Gate operations and event logs',
+    'Shift-level instructions and alerts',
   ]
 
   return (
@@ -547,14 +546,14 @@ function CTASection() {
               href="/contact"
               className="btn-primary-lg"
             >
-              Book Enterprise Demo
+              Start Free
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
             <Link
               href="/contact"
               className="btn-outline px-8 py-4"
             >
-              Request Proposal
+              Book Demo
             </Link>
           </div>
         </div>
