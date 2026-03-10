@@ -148,6 +148,7 @@ function PlanCard({ plan, billingCycle, recommendedPlan, calculatorUsed }) {
     ? (billingCycle === 'yearly' ? plan.startingPrice * 0.85 : plan.startingPrice)
     : plan.startingPrice
   const billedYearly = displayMonthly ? displayMonthly * 12 : null
+  const signupHref = plan.slug === 'enterprise' ? '/contact' : `/signup?plan=${plan.slug}`
 
   return (
     <div
@@ -234,7 +235,7 @@ function PlanCard({ plan, billingCycle, recommendedPlan, calculatorUsed }) {
       </div>
 
       <Link
-        href="/contact"
+        href={signupHref}
         className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-sm transition-colors ${
           showHighlight
             ? 'bg-accent-500 text-white hover:bg-accent-600'
@@ -866,7 +867,7 @@ function StickyCTA() {
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/register"
+              href="/signup?plan=starter"
               className="inline-flex items-center gap-2 bg-primary-100 text-primary-900 px-5 py-2 rounded-lg font-semibold text-sm hover:bg-white transition-colors"
             >
               Start Free Trial
