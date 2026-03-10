@@ -26,7 +26,7 @@ export default function FloatingCTA() {
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-40 transition-all duration-300 ${
+      className={`fixed bottom-0 right-6 py-3 z-40 transition-all duration-300 ${
         isVisible
           ? 'translate-y-0 opacity-100'
           : 'translate-y-16 opacity-0 pointer-events-none'

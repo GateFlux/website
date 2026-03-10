@@ -1,4 +1,6 @@
-import { Fragment } from 'react'
+"use client"
+
+import { Fragment, useState } from 'react'
 import Link from 'next/link'
 import {
   Check,
@@ -20,7 +22,22 @@ import {
 } from 'lucide-react'
 import Container from '../components/Container'
 import FAQ from '../components/FAQ'
-import PricingCalculator, { estimateMonthlyPrice } from '../components/PricingCalculator'
+import PricingCalculator from '../components/PricingCalculator'
+import { estimateMonthlyPrice } from '../lib/pricing'
+import { pricingPlans } from '../data/pricingPlans'
+
+const PLAN_ICONS = {
+  building2: Building2,
+  users: Users,
+  landmark: Landmark,
+  server: Server,
+}
+
+function getRecommendedPlanByUnits(units) {
+  if (units <= 100) return 'starter'
+  if (units <= 300) return 'essential'
+  return 'professional'
+}
 
 // Hero Section
 function HeroSection() {
@@ -120,19 +137,27 @@ function PhilosophySection() {
 }
 
 // Plan Card Component
-function PlanCard({ plan }) {
+function PlanCard({ plan, billingCycle, recommendedPlan, calculatorUsed }) {
+  const Icon = PLAN_ICONS[plan.iconKey] || Building2
   const isEnterprise = plan.startingPrice === null
   const isFree = plan.slug === 'free'
+  const isRecommended = calculatorUsed && recommendedPlan === plan.slug
+  const isPopular = plan.highlighted
+  const showHighlight = isPopular || isRecommended
+  const displayMonthly = !isEnterprise && !isFree
+    ? (billingCycle === 'yearly' ? plan.startingPrice * 0.85 : plan.startingPrice)
+    : plan.startingPrice
+  const billedYearly = displayMonthly ? displayMonthly * 12 : null
 
   return (
     <div
       className={`relative rounded-xl p-6 flex flex-col h-full ${
-        plan.highlighted
-          ? 'bg-white border-2 border-accent-500 shadow-lg'
+        showHighlight
+          ? 'bg-white border-2 border-accent-500 shadow-xl scale-[1.03]'
           : 'bg-white border border-primary-200'
       }`}
     >
-      {plan.highlighted && (
+      {isPopular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <span className="bg-accent-500 text-white text-xs font-bold px-3 py-1 rounded-full">
             Most Popular
@@ -143,11 +168,14 @@ function PlanCard({ plan }) {
       <div className="mb-5">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center">
-            <plan.icon className="h-5 w-5 text-primary-700" />
+            <Icon className="h-5 w-5 text-primary-700" />
           </div>
           <h3 className="text-xl font-bold text-primary-900">{plan.name}</h3>
         </div>
         <p className="text-primary-600 text-sm">{plan.tagline}</p>
+        {isRecommended && (
+          <p className="text-xs font-semibold text-accent-600 mt-2">Recommended for your society</p>
+        )}
       </div>
 
       <div className="mb-5 pb-5 border-b border-primary-100">
@@ -163,10 +191,25 @@ function PlanCard({ plan }) {
           </div>
         ) : (
           <div>
-            <div className="text-3xl font-bold text-primary-900 mb-1">
-              Starts at ₹{plan.startingPrice.toLocaleString('en-IN')} / month
+            <div className="mb-1 text-center">
+              <span className="block text-xs font-semibold uppercase tracking-wider text-primary-500">Starts at</span>
+              <span className="inline-flex items-end gap-1 mt-1">
+                <span className="text-3xl md:text-4xl font-extrabold leading-none text-primary-900">
+                  ₹{Math.round(displayMonthly).toLocaleString('en-IN')}
+                </span>
+                <span className="text-xs md:text-sm font-medium text-primary-500 pb-1">/ mo</span>
+              </span>
             </div>
+            {billingCycle === 'yearly' && (
+              <p className="text-sm text-primary-600 text-center">₹{Math.round(billedYearly).toLocaleString('en-IN')} billed yearly</p>
+            )}
+            {plan.perUnitNote && (
+              <p className="text-sm text-primary-500 text-center mt-2">{plan.perUnitNote}</p>
+            )}
             <p className="text-sm text-primary-600">{plan.priceNote}</p>
+            {plan.recommendedFor && (
+              <p className="text-xs text-primary-500 mt-2">Recommended for: {plan.recommendedFor}</p>
+            )}
           </div>
         )}
         {plan.trialDays > 0 && (
@@ -181,8 +224,8 @@ function PlanCard({ plan }) {
           {plan.includesLabel || 'Includes'}
         </p>
         <ul className="space-y-2">
-          {plan.features.map((feature, index) => (
-            <li key={index} className="flex items-start gap-2">
+          {plan.features.map((feature) => (
+            <li key={feature} className="flex items-start gap-2">
               <Check className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
               <span className="text-sm text-primary-700">{feature}</span>
             </li>
@@ -193,7 +236,7 @@ function PlanCard({ plan }) {
       <Link
         href="/contact"
         className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-sm transition-colors ${
-          plan.highlighted
+          showHighlight
             ? 'bg-accent-500 text-white hover:bg-accent-600'
             : 'bg-primary-900 text-white hover:bg-primary-800'
         }`}
@@ -205,118 +248,7 @@ function PlanCard({ plan }) {
 }
 
 // Plans Section
-function PlansSection() {
-  const plans = [
-    {
-      name: 'Free',
-      slug: 'free',
-      icon: Building2,
-      tagline: 'Up to 25 units',
-      startingPrice: 0,
-      priceNote: 'Up to 25 units',
-      maxUnits: 25,
-      maxUsers: 1,
-      trialDays: 0,
-      features: [
-        'Visitor management',
-        'Complaints tracking',
-        'Announcements',
-      ],
-      cta: 'Start Free',
-      highlighted: false,
-    },
-    {
-      name: 'Starter',
-      slug: 'starter',
-      icon: Building2,
-      tagline: 'Best for small societies.',
-      startingPrice: 999,
-      priceNote: 'Final price depends on the number of units in your society.',
-      maxUnits: 100,
-      maxUsers: 3,
-      trialDays: 30,
-      features: [
-        'Resident management',
-        'Visitor management & security gate entry',
-        'Announcements and notice board',
-        'Complaint and ticket tracking',
-        'Parcel and vehicle records',
-        'Resident and security mobile apps',
-        'Admin panel access',
-      ],
-      cta: 'Start Free Trial',
-      highlighted: false,
-    },
-    {
-      name: 'Essential',
-      slug: 'essential',
-      icon: Users,
-      tagline: 'Ideal for growing residential communities.',
-      startingPrice: 1999,
-      priceNote: 'Final monthly amount scales with your total units.',
-      maxUnits: 300,
-      maxUsers: 8,
-      trialDays: 30,
-      includesLabel: 'Everything in Starter, plus',
-      features: [
-        'Maintenance billing and collections',
-        'Online payments (UPI/cards) and invoices',
-        'Late fee automation',
-        'Document repository',
-        'Amenity and parking management',
-        'Staff management',
-        'Advanced reports, SMS, and audit logs',
-      ],
-      cta: 'Start Free Trial',
-      highlighted: true,
-    },
-    {
-      name: 'Professional',
-      slug: 'professional',
-      icon: Landmark,
-      tagline: 'Advanced tools for large societies.',
-      startingPrice: 3999,
-      priceNote: 'Built for larger societies with advanced operations needs.',
-      maxUnits: 1000,
-      maxUsers: 20,
-      trialDays: 30,
-      includesLabel: 'Everything in Essential, plus',
-      features: [
-        'Accounting integrations',
-        'Vendor and asset management',
-        'Multi-tower operations',
-        'Smart visitor pre-approval and delivery flow',
-        'Event management, polls, and voting',
-        'Analytics dashboard and API access',
-        'WhatsApp notifications',
-      ],
-      cta: 'Start Free Trial',
-      highlighted: false,
-    },
-    {
-      name: 'Enterprise',
-      slug: 'enterprise',
-      icon: Server,
-      tagline: 'For large gated communities and builders',
-      startingPrice: null,
-      priceNote: 'Custom deployment, integrations, and support scope.',
-      maxUnits: null,
-      maxUsers: null,
-      trialDays: 30,
-      includesLabel: 'Everything in Professional, plus',
-      features: [
-        'Multi-society management',
-        'White-label mobile apps',
-        'Custom integrations and SSO',
-        'Dedicated infrastructure',
-        'SLA uptime guarantee',
-        'Priority support and custom reporting',
-        'Builder dashboards and export tooling',
-      ],
-      cta: 'Contact Sales',
-      highlighted: false,
-    },
-  ]
+function PlansSection({ billingCycle, onBillingCycleChange, recommendedPlan, calculatorUsed }) {
 
   return (
     <section className="section-padding bg-neutral-50">
@@ -330,9 +262,38 @@ function PlansSection() {
           </p>
         </div>
 
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex items-center bg-white border border-primary-200 rounded-lg p-1">
+            <button
+              type="button"
+              onClick={() => onBillingCycleChange('monthly')}
+              className={`px-4 py-2 text-sm rounded-md font-medium transition-colors ${
+                billingCycle === 'monthly' ? 'bg-primary-900 text-white' : 'text-primary-700'
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              type="button"
+              onClick={() => onBillingCycleChange('yearly')}
+              className={`px-4 py-2 text-sm rounded-md font-medium transition-colors ${
+                billingCycle === 'yearly' ? 'bg-primary-900 text-white' : 'text-primary-700'
+              }`}
+            >
+              Yearly (save 15%)
+            </button>
+          </div>
+        </div>
+
         <div className="grid md:grid-cols-2 xl:grid-cols-5 gap-5 max-w-7xl mx-auto">
-          {plans.map((plan) => (
-            <PlanCard key={plan.name} plan={plan} />
+          {pricingPlans.map((plan) => (
+            <PlanCard
+              key={plan.name}
+              plan={plan}
+              billingCycle={billingCycle}
+              recommendedPlan={recommendedPlan}
+              calculatorUsed={calculatorUsed}
+            />
           ))}
         </div>
 
@@ -344,15 +305,21 @@ function PlansSection() {
   )
 }
 
-function ExamplePricingSection() {
-  const selectPlanByUnits = (units) => {
-    if (units <= 100) return 'starter'
-    if (units <= 300) return 'essential'
-    return 'professional'
-  }
+function TrustIndicatorSection() {
+  return (
+    <section className="py-8 bg-white border-t border-primary-100">
+      <Container>
+        <p className="text-center text-primary-600 font-medium">
+          Trusted by residential communities managing thousands of homes.
+        </p>
+      </Container>
+    </section>
+  )
+}
 
+function ExamplePricingSection({ onCalculatorChange }) {
   const examples = [50, 100, 200, 500].map((units) => {
-    const plan = selectPlanByUnits(units)
+    const plan = getRecommendedPlanByUnits(units)
 
     return {
       units,
@@ -394,7 +361,7 @@ function ExamplePricingSection() {
             </div>
           </div>
 
-          <PricingCalculator />
+          <PricingCalculator onChange={onCalculatorChange} />
         </div>
       </Container>
     </section>
@@ -403,7 +370,7 @@ function ExamplePricingSection() {
 
 // Feature Comparison Table
 function ComparisonTableSection() {
-  const plans = ['Free', 'Starter', 'Essential', 'Professional', 'Enterprise']
+  const plans = pricingPlans.map((plan) => plan.name)
 
   // null = custom/unlimited, number = limit, true/false = included/not
   const scaleRows = [
@@ -497,13 +464,6 @@ function ComparisonTableSection() {
         { label: 'Priority Support & SLA',             values: [false, false, false, false, true] },
       ],
     },
-  ]
-
-  const planColors = [
-    '',
-    '',
-    'text-accent-600 font-bold',
-    '',
   ]
 
   return (
@@ -893,17 +853,25 @@ function StickyCTA() {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-primary-900 border-t border-primary-700 py-3 z-40 hidden md:block">
       <Container>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <p className="text-white text-sm">
             Ready to discuss your community's infrastructure requirements?
           </p>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 bg-accent-500 text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-accent-600 transition-colors"
-          >
-            Schedule Consultation
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 bg-accent-500 text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-accent-600 transition-colors"
+            >
+              Schedule Consultation
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 bg-primary-100 text-primary-900 px-5 py-2 rounded-lg font-semibold text-sm hover:bg-white transition-colors"
+            >
+              Start Free Trial
+            </Link>
+          </div>
         </div>
       </Container>
     </div>
@@ -912,12 +880,27 @@ function StickyCTA() {
 
 // Main Pricing Page
 export default function PricingPage() {
+  const [billingCycle, setBillingCycle] = useState('monthly')
+  const [calculatorUsed, setCalculatorUsed] = useState(false)
+  const [recommendedPlan, setRecommendedPlan] = useState(null)
+
+  const handleCalculatorChange = ({ used, units, plan }) => {
+    setCalculatorUsed(Boolean(used))
+    setRecommendedPlan(plan || getRecommendedPlanByUnits(units))
+  }
+
   return (
     <>
       <HeroSection />
       <PhilosophySection />
-      <PlansSection />
-      <ExamplePricingSection />
+      <PlansSection
+        billingCycle={billingCycle}
+        onBillingCycleChange={setBillingCycle}
+        recommendedPlan={recommendedPlan}
+        calculatorUsed={calculatorUsed}
+      />
+      <TrustIndicatorSection />
+      <ExamplePricingSection onCalculatorChange={handleCalculatorChange} />
       <ComparisonTableSection />
       <AddOnsSection />
       <ImplementationSection />
