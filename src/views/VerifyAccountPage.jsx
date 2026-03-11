@@ -4,10 +4,11 @@ import Link from 'next/link'
 import Script from 'next/script'
 import { useSearchParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
+import config from '../lib/config'
 
-const API_BASE = process.env.NEXT_PUBLIC_GATEFLUX_API_BASE_URL || 'http://localhost:8000/api/v1'
-const APP_BASE = (process.env.NEXT_PUBLIC_APP_BASE_URL || 'https://app.gateflux.co').replace(/\/$/, '')
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''
+const API_BASE = config.api.baseUrl
+const APP_BASE = config.app.baseUrl
+const RECAPTCHA_SITE_KEY = config.recaptcha.siteKey
 
 async function apiPost(path, payload) {
   const response = await fetch(`${API_BASE}${path}`, {

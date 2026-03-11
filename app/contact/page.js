@@ -1,13 +1,14 @@
 import ContactPage from '../../src/views/ContactPage'
+import config from '../../src/lib/config'
 
 export const metadata = {
-  title: 'Book a Demo — GateFlux',
-  description: 'See GateFlux in action with a personalised demo for your community. Our team will walk you through the features most relevant to your needs. Response within 24 hours.',
-  alternates: { canonical: 'https://gateflux.co/contact' },
+  title: 'Contact GateFlux — GateFlux',
+  description: 'Get in touch with GateFlux for sales, support, partnership, and product questions.',
+  alternates: { canonical: `${config.website.baseUrl}/contact` },
   openGraph: {
-    title: 'Book a Demo — GateFlux',
-    description: 'Request a personalised GateFlux demo. Talk to our product experts and get your questions answered.',
-    url: 'https://gateflux.co/contact',
+    title: 'Contact GateFlux — GateFlux',
+    description: 'Reach the GateFlux team for support, sales, and partnerships.',
+    url: `${config.website.baseUrl}/contact`,
   },
 }
 

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import Container from '../components/Container'
 import SectionHeader from '../components/SectionHeader'
+import config from '../lib/config'
 
 // Hero Section
 function HeroSection() {
@@ -325,7 +326,7 @@ function InvestorsSection() {
                 ))}
               </div>
               <a
-                href="mailto:investors@gateflux.co"
+                href={`mailto:${config.email.investors}`}
                 className="inline-flex items-center gap-2 bg-primary-900 text-white font-medium px-5 py-3 rounded-lg hover:bg-primary-800 transition-colors"
               >
                 Get in Touch
@@ -364,8 +365,8 @@ function InvestorsSection() {
               <div className="mt-6 pt-5 border-t border-primary-200">
                 <p className="text-xs text-primary-500">
                   Deck and financial projections available on request.{' '}
-                  <a href="mailto:investors@gateflux.co" className="text-primary-700 hover:text-primary-900 font-medium underline">
-                    investors@gateflux.co
+                  <a href={`mailto:${config.email.investors}`} className="text-primary-700 hover:text-primary-900 font-medium underline">
+                    {config.email.investors}
                   </a>
                 </p>
               </div>
@@ -416,7 +417,7 @@ function CareersSection() {
             </div>
 
             <a
-              href="mailto:careers@gateflux.co"
+              href={`mailto:${config.email.careers}`}
               className="inline-flex items-center gap-2 text-primary-700 hover:text-primary-900 font-medium"
             >
               Send your resume
@@ -436,7 +437,7 @@ function CareersSection() {
                 future opportunities.
               </p>
               <a
-                href="mailto:careers@gateflux.co"
+                href={`mailto:${config.email.careers}`}
                 className="inline-flex items-center gap-2 bg-primary-900 text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-primary-800 transition-colors"
               >
                 Express Interest
@@ -470,13 +471,13 @@ function PressSection() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
               <a
-                href="mailto:press@gateflux.co"
+                href={`mailto:${config.email.press}`}
                 className="inline-flex items-center gap-2 bg-primary-900 text-white font-medium px-5 py-2.5 rounded-lg hover:bg-primary-800 transition-colors"
               >
                 Press Enquiries
                 <ArrowRight className="h-4 w-4" />
               </a>
-              <span className="text-primary-500">press@gateflux.co</span>
+              <span className="text-primary-500">{config.email.press}</span>
             </div>
           </div>
         </div>
@@ -501,7 +502,7 @@ function CTASection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/contact"
+              href="/book-demo"
               className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-xl bg-accent-500 text-white hover:bg-accent-600 transition-colors duration-300"
             >
               Book a Demo

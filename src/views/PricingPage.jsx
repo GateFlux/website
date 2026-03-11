@@ -23,6 +23,7 @@ import {
 import Container from '../components/Container'
 import FAQ from '../components/FAQ'
 import PricingCalculator from '../components/PricingCalculator'
+import config from '../lib/config'
 import { estimateMonthlyPrice } from '../lib/pricing'
 import { pricingPlans } from '../data/pricingPlans'
 
@@ -148,7 +149,7 @@ function PlanCard({ plan, billingCycle, recommendedPlan, calculatorUsed }) {
     ? (billingCycle === 'yearly' ? plan.startingPrice * 0.85 : plan.startingPrice)
     : plan.startingPrice
   const billedYearly = displayMonthly ? displayMonthly * 12 : null
-  const signupHref = plan.slug === 'enterprise' ? '/contact' : `/signup?plan=${plan.slug}`
+  const signupHref = plan.slug === 'enterprise' ? '/book-demo' : `/signup?plan=${plan.slug}`
 
   return (
     <div
@@ -820,7 +821,7 @@ function CTASection() {
           </p>
           
           <Link
-            href="/contact"
+            href="/book-demo"
             className="inline-flex items-center gap-2 bg-accent-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-accent-600 transition-colors"
           >
             Book Enterprise Demo
@@ -836,11 +837,11 @@ function CTASection() {
               +91 91210 92479
             </a>
             <a
-              href="mailto:contact@gateflux.co"
+              href={`mailto:${config.email.support}`}
               className="flex items-center gap-2 text-primary-300 hover:text-white transition-colors"
             >
               <Mail className="h-4 w-4" />
-              contact@gateflux.co
+              {config.email.support}
             </a>
           </div>
         </div>
@@ -860,7 +861,7 @@ function StickyCTA() {
           </p>
           <div className="flex items-center gap-3">
             <Link
-              href="/contact"
+              href="/book-demo"
               className="inline-flex items-center gap-2 bg-accent-500 text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-accent-600 transition-colors"
             >
               Schedule Consultation

@@ -1,13 +1,14 @@
 import HomePage from '../src/views/HomePage'
+import config from '../src/lib/config'
 
 export const metadata = {
   title: 'GateFlux | Smart Community Management Platform',
   description: 'GateFlux unifies residents, security, and management into one intelligent, secure ecosystem. Visitor management, gate security, billing, maintenance and more — all in one platform.',
-  alternates: { canonical: 'https://gateflux.co/' },
+  alternates: { canonical: `${config.website.baseUrl}/` },
   openGraph: {
     title: 'GateFlux | Smart Community Management Platform',
     description: 'GateFlux unifies residents, security, and management into one intelligent, secure ecosystem.',
-    url: 'https://gateflux.co/',
+    url: `${config.website.baseUrl}/`,
   },
 }
 

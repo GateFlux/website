@@ -22,6 +22,7 @@ import {
 import Container from '../components/Container'
 import SectionHeader from '../components/SectionHeader'
 import Card from '../components/Card'
+import config from '../lib/config'
 
 // Hero Section
 function HeroSection() {
@@ -386,7 +387,7 @@ function DpdpSection() {
       section: 'S.13',
       title: 'Grievance Redressal',
       status: 'implemented',
-      description: 'Designated Grievance Officer reachable at privacy@gateflux.co. Grievances acknowledged within 48 hours and resolved within 30 days.',
+      description: 'Designated Grievance Officer reachable at ' + config.email.privacy + '. Grievances acknowledged within 48 hours and resolved within 30 days.',
     },
     {
       section: 'S.8(6)',
@@ -460,10 +461,10 @@ function DpdpSection() {
                 </p>
               </div>
               <a
-                href="mailto:privacy@gateflux.co"
+                href={`mailto:${config.email.privacy}`}
                 className="flex-shrink-0 inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
               >
-                privacy@gateflux.co
+                {config.email.privacy}
               </a>
             </div>
           </div>

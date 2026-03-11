@@ -469,7 +469,7 @@ function CTASection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/contact"
+              href="/book-demo"
               className="btn-primary-lg group"
             >
               Book a Demo

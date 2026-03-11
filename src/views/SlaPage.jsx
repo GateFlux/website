@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import Container from '../components/Container'
 import SectionHeader from '../components/SectionHeader'
+import config from '../lib/config'
 
 // Hero
 function HeroSection() {
@@ -414,11 +415,11 @@ function CtaSection() {
               <ArrowRight className="h-4 w-4" />
             </Link>
             <a
-              href="mailto:hello@gateflux.co"
+              href={`mailto:${config.email.support}`}
               className="inline-flex items-center gap-2 text-primary-200 hover:text-white transition-colors text-sm"
             >
               <Mail className="h-4 w-4" />
-              hello@gateflux.co
+              {config.email.support}
             </a>
           </div>
         </div>

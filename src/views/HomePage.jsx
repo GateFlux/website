@@ -64,7 +64,7 @@ function HeroSection() {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link
-                href="/contact"
+                href="/book-demo"
                 className="btn-outline px-8 py-4"
               >
                 Book Demo
@@ -543,14 +543,14 @@ function CTASection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/contact"
+              href="/signup"
               className="btn-primary-lg"
             >
               Start Free
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
             <Link
-              href="/contact"
+              href="/book-demo"
               className="btn-outline px-8 py-4"
             >
               Book Demo
