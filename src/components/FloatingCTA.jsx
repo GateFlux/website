@@ -9,8 +9,8 @@ export default function FloatingCTA() {
   const [isVisible, setIsVisible] = useState(false)
   const pathname = usePathname()
 
-  // Don't show on contact page
-  const isContactPage = pathname === '/contact'
+  // Don't show on contact or book-demo page
+  const isContactPage = pathname === '/contact' || pathname === '/book-demo'
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,14 +26,14 @@ export default function FloatingCTA() {
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-40 transition-all duration-300 ${
+      className={`fixed bottom-0 right-6 py-3 z-40 transition-all duration-300 ${
         isVisible
           ? 'translate-y-0 opacity-100'
           : 'translate-y-16 opacity-0 pointer-events-none'
       }`}
     >
       <Link
-        href="/contact"
+        href="/book-demo"
         className="flex items-center gap-2 bg-accent-500 text-white px-4 py-2.5 rounded-lg shadow-lg hover:bg-accent-600 transition-colors"
       >
         <Calendar className="h-4 w-4" />

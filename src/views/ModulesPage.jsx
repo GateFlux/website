@@ -458,7 +458,7 @@ function HeroSection() {
             across operations, finance, governance, community, and infrastructure.
           </p>
           <Link
-            href="/contact"
+            href="/book-demo"
             className="inline-flex items-center gap-2 bg-accent-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-accent-600 transition-colors"
           >
             Book a Demo
@@ -546,7 +546,7 @@ export default function ModulesPage() {
               Schedule a demo and explore how GateFlux can be configured for your community.
             </p>
             <Link
-              href="/contact"
+              href="/book-demo"
               className="inline-flex items-center gap-2 bg-accent-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-accent-600 transition-colors"
             >
               Book a Demo

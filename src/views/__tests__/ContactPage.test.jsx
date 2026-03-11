@@ -1,19 +1,20 @@
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import ContactPage from '../ContactPage'
+import BookDemoPage from '../BookDemoPage'
+import { submitDemoRequest } from '../../lib/leadsApi'
 
-// Mock lucide-react icons to avoid SVG rendering issues in tests
+jest.mock('../../lib/leadsApi', () => ({
+  submitDemoRequest: jest.fn(),
+}))
+
 jest.mock('lucide-react', () => {
   const Icon = ({ className }) => <svg className={className} />
   Icon.displayName = 'MockIcon'
   return new Proxy({}, { get: () => Icon })
 })
 
-// Mock sub-components that aren't under test
 jest.mock('../../components/Container', () => {
-  const MockContainer = ({ children, className }) => (
-    <div className={className}>{children}</div>
-  )
+  const MockContainer = ({ children, className }) => <div className={className}>{children}</div>
   MockContainer.displayName = 'MockContainer'
   return MockContainer
 })
@@ -25,146 +26,65 @@ jest.mock('../../components/SectionHeader', () => {
 })
 
 jest.mock('../../components/FAQ', () => {
-  const MockFaq = ({ items }) => (
-    <ul>{items.map((item) => <li key={item.question}>{item.question}</li>)}</ul>
-  )
+  const MockFaq = ({ items }) => <ul>{items.map((item) => <li key={item.question}>{item.question}</li>)}</ul>
   MockFaq.displayName = 'MockFaq'
   return MockFaq
 })
 
-describe('ContactPage', () => {
-  it('renders the contact form', () => {
-    render(<ContactPage />)
-    expect(screen.getByText('Request a Demo')).toBeInTheDocument()
-  })
-})
-
-describe('ContactForm', () => {
-  beforeAll(() => {
-    jest.useFakeTimers()
-  })
-
-  afterAll(() => {
-    jest.useRealTimers()
-  })
-
+describe('BookDemoPage', () => {
   beforeEach(() => {
-    render(<ContactPage />)
+    submitDemoRequest.mockReset()
   })
 
-  it('renders all required form fields', () => {
-    expect(screen.getByLabelText(/full name/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/email address/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/phone number/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/community name/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/number of units/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/role/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/message/i)).toBeInTheDocument()
-  })
+  it('renders demo form and submits payload', async () => {
+    submitDemoRequest.mockResolvedValue({ success: true })
+    const user = userEvent.setup()
 
-  it('renders all required fields with required indicator', () => {
-    // The Input component renders a * for required fields
-    const nameInput = screen.getByLabelText(/full name/i)
-    const emailInput = screen.getByLabelText(/email address/i)
-    const phoneInput = screen.getByLabelText(/phone number/i)
-    const communityInput = screen.getByLabelText(/community name/i)
+    render(<BookDemoPage />)
 
-    expect(nameInput).toBeRequired()
-    expect(emailInput).toBeRequired()
-    expect(phoneInput).toBeRequired()
-    expect(communityInput).toBeRequired()
-  })
-
-  it('message field is optional (not required)', () => {
-    const messageField = screen.getByLabelText(/message/i)
-    expect(messageField).not.toBeRequired()
-  })
-
-  it('renders unit options in the select', () => {
-    const select = screen.getByLabelText(/number of units/i)
-    const options = Array.from(select.querySelectorAll('option')).map((o) => o.value)
-    expect(options).toContain('1-50')
-    expect(options).toContain('51-100')
-    expect(options).toContain('1000+')
-  })
-
-  it('renders role options in the select', () => {
-    const select = screen.getByLabelText(/role/i)
-    const options = Array.from(select.querySelectorAll('option')).map((o) => o.value)
-    expect(options).toContain('committee')
-    expect(options).toContain('facility-manager')
-    expect(options).toContain('resident')
-  })
-
-  it('updates field values on input', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
-    const nameInput = screen.getByLabelText(/full name/i)
-    await user.type(nameInput, 'Jane Doe')
-    expect(nameInput).toHaveValue('Jane Doe')
-  })
-
-  it('shows submitting state while form is being submitted', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
-
-    await user.type(screen.getByLabelText(/full name/i), 'Jane Doe')
+    await user.type(screen.getByLabelText(/first name/i), 'Jane')
+    await user.type(screen.getByLabelText(/last name/i), 'Doe')
     await user.type(screen.getByLabelText(/email address/i), 'jane@example.com')
-    await user.type(screen.getByLabelText(/phone number/i), '+91 91210 92479')
-    await user.type(screen.getByLabelText(/community name/i), 'Test Apartments')
+    await user.type(screen.getByLabelText(/phone number/i), '+919999999999')
+    await user.type(screen.getByLabelText(/community name/i), 'Green Valley')
     fireEvent.change(screen.getByLabelText(/number of units/i), { target: { value: '51-100' } })
-    fireEvent.change(screen.getByLabelText(/role/i), { target: { value: 'committee' } })
+    fireEvent.change(screen.getByLabelText(/role/i), { target: { value: 'Committee Member' } })
+    await user.type(screen.getByLabelText(/message/i), 'Need a walkthrough')
 
-    const submitButton = screen.getByRole('button', { name: /book demo/i })
-    fireEvent.click(submitButton)
+    await user.click(screen.getByRole('button', { name: /book demo/i }))
 
-    expect(screen.getByRole('button', { name: /submitting/i })).toBeDisabled()
-  })
-
-  it('shows success state after form submission completes', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
-
-    await user.type(screen.getByLabelText(/full name/i), 'Jane Doe')
-    await user.type(screen.getByLabelText(/email address/i), 'jane@example.com')
-    await user.type(screen.getByLabelText(/phone number/i), '+91 91210 92479')
-    await user.type(screen.getByLabelText(/community name/i), 'Test Apartments')
-    fireEvent.change(screen.getByLabelText(/number of units/i), { target: { value: '51-100' } })
-    fireEvent.change(screen.getByLabelText(/role/i), { target: { value: 'committee' } })
-
-    fireEvent.click(screen.getByRole('button', { name: /book demo/i }))
-
-    act(() => {
-      jest.advanceTimersByTime(1500)
+    await waitFor(() => {
+      expect(submitDemoRequest).toHaveBeenCalledWith({
+        first_name: 'Jane',
+        last_name: 'Doe',
+        email: 'jane@example.com',
+        phone: '+919999999999',
+        company_name: 'Green Valley',
+        job_title: 'Committee Member',
+        company_size: '51-100',
+        message: 'Need a walkthrough',
+      })
     })
 
     expect(await screen.findByText(/thank you/i)).toBeInTheDocument()
-
-    expect(screen.getByText(/we've received your request/i)).toBeInTheDocument()
   })
 
-  it('resets form when "Submit another request" is clicked', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
+  it('shows API error when request fails', async () => {
+    submitDemoRequest.mockRejectedValue(new Error('Submission failed'))
+    const user = userEvent.setup()
 
-    await user.type(screen.getByLabelText(/full name/i), 'Jane Doe')
+    render(<BookDemoPage />)
+
+    await user.type(screen.getByLabelText(/first name/i), 'Jane')
+    await user.type(screen.getByLabelText(/last name/i), 'Doe')
     await user.type(screen.getByLabelText(/email address/i), 'jane@example.com')
-    await user.type(screen.getByLabelText(/phone number/i), '+91 91210 92479')
-    await user.type(screen.getByLabelText(/community name/i), 'Test Apartments')
+    await user.type(screen.getByLabelText(/phone number/i), '+919999999999')
+    await user.type(screen.getByLabelText(/community name/i), 'Green Valley')
     fireEvent.change(screen.getByLabelText(/number of units/i), { target: { value: '51-100' } })
-    fireEvent.change(screen.getByLabelText(/role/i), { target: { value: 'committee' } })
+    fireEvent.change(screen.getByLabelText(/role/i), { target: { value: 'Committee Member' } })
 
-    fireEvent.click(screen.getByRole('button', { name: /book demo/i }))
+    await user.click(screen.getByRole('button', { name: /book demo/i }))
 
-    act(() => {
-      jest.advanceTimersByTime(1500)
-    })
-
-    expect(await screen.findByText(/thank you/i)).toBeInTheDocument()
-
-    fireEvent.click(screen.getByText(/submit another request/i))
-
-    // Form should be back
-    expect(screen.getByText('Request a Demo')).toBeInTheDocument()
-    expect(screen.queryByText(/thank you/i)).not.toBeInTheDocument()
-
-    // Fields should be cleared
-    expect(screen.getByLabelText(/full name/i)).toHaveValue('')
+    expect(await screen.findByText(/submission failed/i)).toBeInTheDocument()
   })
 })

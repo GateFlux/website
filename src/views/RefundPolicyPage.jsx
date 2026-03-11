@@ -6,6 +6,7 @@ import LegalPageLayout, {
   LegalHighlight,
   LegalTable,
 } from '../components/LegalPageLayout'
+import config from '../lib/config'
 
 export default function RefundPolicyPage() {
   return (
@@ -15,7 +16,7 @@ export default function RefundPolicyPage() {
       subtitle="Your rights regarding subscription cancellation, refunds, and billing practices for the GateFlux Platform."
       version="1.0"
       effectiveDate="28 Feb, 2026"
-      contactEmail="billing@gateflux.co"
+      contactEmail={config.email.billing}
       contactLabel="Billing or refund queries:"
     >
       <p className="text-neutral-600 leading-relaxed mb-10 text-[15px]">

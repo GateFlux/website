@@ -6,6 +6,7 @@ export { default as SecurityPage } from './SecurityPage'
 export { default as PricingPage } from './PricingPage'
 export { default as AboutPage } from './AboutPage'
 export { default as ContactPage } from './ContactPage'
+export { default as BookDemoPage } from './BookDemoPage'
 
 // Legal & Policy Pages
 export { default as TermsPage } from './TermsPage'

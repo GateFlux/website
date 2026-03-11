@@ -3,6 +3,7 @@ import LegalPageLayout, {
   LegalSection,
   LegalList,
 } from '../components/LegalPageLayout'
+import config from '../lib/config'
 
 export default function TermsPage() {
   return (
@@ -12,7 +13,7 @@ export default function TermsPage() {
       subtitle="These Terms govern your access to and use of the GateFlux Platform. By using the Platform, you agree to be legally bound by these Terms."
       version="1.0"
       effectiveDate="28 Feb, 2026"
-      contactEmail="legal@gateflux.co"
+      contactEmail={config.email.legal}
       contactLabel="Legal questions? Reach our team at"
     >
       <LegalSection number="1" title="Nature of Service">

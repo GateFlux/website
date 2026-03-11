@@ -59,6 +59,62 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/favicon/manifest.json?v=2" />
         <meta name="msapplication-config" content="/favicon/browserconfig.xml" />
         <meta name="msapplication-TileColor" content="#1c153e" />
+        <Script id="strip-heading-tag-attrs" strategy="beforeInteractive">
+          {`
+            (function () {
+              function stripAttrs(root) {
+                if (!root || !root.querySelectorAll) return;
+                var nodes = root.querySelectorAll('[data-heading-tag]');
+                for (var i = 0; i < nodes.length; i += 1) {
+                  nodes[i].removeAttribute('data-heading-tag');
+                }
+              }
+
+              function startObserver() {
+                if (!document || !document.documentElement || !window.MutationObserver) return;
+
+                stripAttrs(document);
+
+                var observer = new MutationObserver(function (mutations) {
+                  for (var i = 0; i < mutations.length; i += 1) {
+                    var mutation = mutations[i];
+
+                    if (mutation.type === 'attributes' && mutation.target && mutation.target.removeAttribute) {
+                      mutation.target.removeAttribute('data-heading-tag');
+                    }
+
+                    if (mutation.type === 'childList' && mutation.addedNodes && mutation.addedNodes.length) {
+                      for (var j = 0; j < mutation.addedNodes.length; j += 1) {
+                        var node = mutation.addedNodes[j];
+                        if (!node || node.nodeType !== 1) continue;
+                        if (node.hasAttribute && node.hasAttribute('data-heading-tag')) {
+                          node.removeAttribute('data-heading-tag');
+                        }
+                        stripAttrs(node);
+                      }
+                    }
+                  }
+                });
+
+                observer.observe(document.documentElement, {
+                  subtree: true,
+                  childList: true,
+                  attributes: true,
+                  attributeFilter: ['data-heading-tag'],
+                });
+
+                window.addEventListener('load', function () {
+                  stripAttrs(document);
+                  setTimeout(function () {
+                    observer.disconnect();
+                  }, 4000);
+                }, { once: true });
+              }
+
+              startObserver();
+            })();
+          `}
+        </Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
