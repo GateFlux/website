@@ -34,12 +34,12 @@ function HeroSection() {
             Book a Demo
           </span>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5 tracking-tight">
-            Book an{' '}
-            <span className="text-primary-200">Enterprise Demo</span>
+            Book a{' '}
+            <span className="text-primary-200">GateFlux Demo</span>
           </h1>
           <p className="text-base md:text-lg text-primary-300 leading-relaxed">
-            See how GateFlux can streamline your community operations. 
-            Our team will show you a personalized demo tailored to your needs.
+            See how GateFlux runs member communication, billing, and society administration in one place.
+            Our team will walk you through a demo tailored to your community.
           </p>
         </div>
       </Container>
@@ -58,7 +58,7 @@ function DemoBenefits() {
     {
       icon: Users,
       title: 'Meet the Team',
-      description: 'Talk to our product experts who understand community management challenges.',
+      description: 'Talk to product specialists who understand day-to-day community operations.',
     },
     {
       icon: MessageSquare,
@@ -149,7 +149,7 @@ function ContactForm() {
     { value: 'Committee Member', label: 'Committee Member' },
     { value: 'Builder', label: 'Builder' },
     { value: 'Facility Manager', label: 'Facility Manager' },
-    { value: 'Resident', label: 'Resident' },
+    { value: 'Member', label: 'Member' },
   ]
 
   if (isSubmitted) {
@@ -436,7 +436,7 @@ function EnterpriseSection() {
               Request an Enterprise Proposal
             </h2>
             <p className="text-primary-300 text-base mb-6 leading-relaxed">
-              For large communities, housing societies, or builder groups that need custom solutions, 
+              For large communities, multi-society portfolios, or builder groups that need custom workflows,
               our enterprise team will create a tailored proposal that meets your specific requirements.
             </p>
 
@@ -495,7 +495,7 @@ function FAQSection() {
     },
     {
       question: 'Who should attend the demo?',
-      answer: 'We recommend having committee members, facility managers, and anyone involved in decision-making attend. The more stakeholders present, the better we can address everyone\'s concerns.',
+      answer: 'We recommend including committee members, facility managers, and operations or finance decision-makers. The more stakeholders present, the better we can align the workflow to your community.',
     },
     {
       question: 'Is there a free trial?',

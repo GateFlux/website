@@ -46,37 +46,35 @@ const INDIAN_STATES_AND_UTS = [
   'Puducherry',
 ]
 
-const PLAN_OPTIONS = {
-  free: {
-    label: 'Free',
-    pricing: '₹0/month',
-    notes: '30-day trial included',
-    billing: 'No credit card required',
-  },
-  starter: {
-    label: 'Starter',
-    pricing: '₹999/month base',
-    notes: '₹8 per unit',
-    billing: 'Billing monthly',
-  },
-  essential: {
-    label: 'Essential',
-    pricing: '₹1,999/month base',
-    notes: '₹7 per unit',
-    billing: 'Billing monthly',
-  },
-  professional: {
-    label: 'Professional',
-    pricing: '₹3,999/month base',
-    notes: '₹6 per unit',
-    billing: 'Billing monthly',
-  },
-  enterprise: {
-    label: 'Enterprise',
-    pricing: 'Contact Sales',
-    notes: 'Custom pricing',
-    billing: 'Annual and custom billing',
-  },
+const ENTERPRISE_PLAN = {
+  label: 'Enterprise',
+  pricing: 'Contact Sales',
+  notes: 'Custom pricing',
+  billing: 'Annual and custom billing',
+}
+
+function formatCurrency(value) {
+  return `₹${Math.round(Number(value || 0)).toLocaleString('en-IN')}`
+}
+
+function mapPublicPlanToOption(plan) {
+  const slug = String(plan?.slug || '').toLowerCase()
+  const version = plan?.plan_version ? ` (${String(plan.plan_version).toLowerCase()})` : ''
+  const basePrice = plan?.base_price
+  const perUnitPrice = plan?.per_unit_price
+  const trialDays = Number(plan?.trial_days || 30)
+  const isCustom = basePrice === null || perUnitPrice === null || slug === 'enterprise'
+
+  return {
+    slug,
+    label: `${plan?.display_name || plan?.name || slug}${version}`,
+    pricing: isCustom ? 'Contact Sales' : `${formatCurrency(basePrice)}/month base`,
+    notes: isCustom ? 'Custom pricing' : `${formatCurrency(perUnitPrice)} per unit`,
+    billing: trialDays > 0 ? `${trialDays}-day trial included` : 'Billing monthly',
+    version: plan?.plan_version || null,
+    base_price: basePrice,
+    per_unit_price: perUnitPrice,
+  }
 }
 
 const DISPOSABLE_DOMAINS = ['mailinator.com', 'tempmail.com', '10minutemail.com']
@@ -90,6 +88,15 @@ function slugifySocietyName(name) {
     .replace(/-+/g, '-')
 }
 
+function normalizeWorkspaceSlug(value) {
+  return String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
 async function apiPost(path, payload) {
   const response = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
@@ -98,6 +105,24 @@ async function apiPost(path, payload) {
       Accept: 'application/json',
     },
     body: JSON.stringify(payload),
+  })
+
+  const data = await response.json().catch(() => ({}))
+
+  if (!response.ok) {
+    const message = data?.message || 'Request failed'
+    throw new Error(message)
+  }
+
+  return data
+}
+
+async function apiGet(path) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+    },
   })
 
   const data = await response.json().catch(() => ({}))
@@ -124,16 +149,65 @@ export default function SocietySignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [assignedSetupUrl, setAssignedSetupUrl] = useState('')
+  const [isCustomSlugEnabled, setIsCustomSlugEnabled] = useState(false)
+  const [customSlug, setCustomSlug] = useState('')
+  const [isCustomSlugDirty, setIsCustomSlugDirty] = useState(false)
+  const [slugAvailability, setSlugAvailability] = useState({
+    status: 'idle',
+    requestedSlug: '',
+    resolvedSlug: '',
+    message: '',
+  })
   const [isStateDropdownOpen, setIsStateDropdownOpen] = useState(false)
   const [stateSearch, setStateSearch] = useState('')
+  const [planOptions, setPlanOptions] = useState({})
+  const [plansLoading, setPlansLoading] = useState(true)
   const stateDropdownRef = useRef(null)
 
-  const preselectedPlan = useMemo(() => {
-    const plan = (searchParams.get('plan') || '').toLowerCase()
-    return Object.prototype.hasOwnProperty.call(PLAN_OPTIONS, plan) ? plan : null
-  }, [searchParams])
+  const requestedPlan = useMemo(() => (searchParams.get('plan') || '').toLowerCase(), [searchParams])
+  const isEnterpriseSignupRequested = requestedPlan === 'enterprise'
 
-  const [showPlanSelector, setShowPlanSelector] = useState(!preselectedPlan)
+  const preselectedPlan = useMemo(() => {
+    return Object.prototype.hasOwnProperty.call(planOptions, requestedPlan) ? requestedPlan : null
+  }, [requestedPlan, planOptions])
+
+  useEffect(() => {
+    let mounted = true
+
+    const loadPublicPlans = async () => {
+      try {
+        const response = await apiGet('/public/plans')
+        const rows = Array.isArray(response?.data) ? response.data : []
+        const normalized = rows.reduce((acc, plan) => {
+          const mapped = mapPublicPlanToOption(plan)
+          if (mapped.slug && mapped.slug !== 'enterprise') {
+            acc[mapped.slug] = mapped
+          }
+
+          return acc
+        }, {})
+
+        if (mounted) {
+          setPlanOptions(normalized)
+        }
+      } catch (_err) {
+        if (mounted) {
+          setPlanOptions({})
+        }
+      } finally {
+        if (mounted) {
+          setPlansLoading(false)
+        }
+      }
+    }
+
+    void loadPublicPlans()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   const [form, setForm] = useState({
     plan_slug: preselectedPlan || '',
@@ -155,9 +229,6 @@ export default function SocietySignupPage() {
   useEffect(() => {
     if (preselectedPlan) {
       setForm((prev) => ({ ...prev, plan_slug: preselectedPlan }))
-      setShowPlanSelector(false)
-    } else {
-      setShowPlanSelector(true)
     }
   }, [preselectedPlan])
 
@@ -184,13 +255,109 @@ export default function SocietySignupPage() {
   }, [stateSearch])
 
   const selectedPlanDetails = useMemo(() => {
-    return form.plan_slug ? PLAN_OPTIONS[form.plan_slug] : null
-  }, [form.plan_slug])
+    return form.plan_slug ? planOptions[form.plan_slug] : null
+  }, [form.plan_slug, planOptions])
+
+  const handlePlanChange = (event) => {
+    const nextPlan = event.target.value
+
+    setForm((prev) => ({ ...prev, plan_slug: nextPlan }))
+  }
+
+  const handleSocietyNameChange = (event) => {
+    const nextName = event.target.value
+    const nextDerivedSlug = slugifySocietyName(nextName)
+
+    setForm((prev) => ({ ...prev, society_name: nextName }))
+    if (isCustomSlugEnabled && !isCustomSlugDirty) {
+      setCustomSlug(nextDerivedSlug)
+    }
+    setSlugAvailability({
+      status: 'idle',
+      requestedSlug: nextDerivedSlug,
+      resolvedSlug: '',
+      message: '',
+    })
+  }
+
+  const derivedSlug = useMemo(() => slugifySocietyName(form.society_name), [form.society_name])
+  const requestedSlug = useMemo(() => {
+    return isCustomSlugEnabled ? normalizeWorkspaceSlug(customSlug) : derivedSlug
+  }, [customSlug, derivedSlug, isCustomSlugEnabled])
+
+  const resolvedSlug = useMemo(() => {
+    if (slugAvailability.requestedSlug === requestedSlug && slugAvailability.resolvedSlug) {
+      return slugAvailability.resolvedSlug
+    }
+
+    return requestedSlug
+  }, [requestedSlug, slugAvailability])
 
   const slugPreview = useMemo(() => {
-    const slug = slugifySocietyName(form.society_name)
-    return slug ? `${APP_BASE}/${slug}/setup` : `${APP_BASE}/your-society/setup`
-  }, [form.society_name])
+    return resolvedSlug ? `${APP_BASE}/${resolvedSlug}/setup` : `${APP_BASE}/your-society/setup`
+  }, [resolvedSlug])
+
+  const syncSlugAvailability = async ({ societyName, requestedWorkspaceSlug }) => {
+    const trimmedName = String(societyName || '').trim()
+    const normalizedRequestedSlug = normalizeWorkspaceSlug(requestedWorkspaceSlug)
+    const isSlugQuery = normalizedRequestedSlug !== ''
+
+    if (isSlugQuery && !/^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/.test(normalizedRequestedSlug)) {
+      setSlugAvailability({
+        status: 'invalid',
+        requestedSlug: normalizedRequestedSlug,
+        resolvedSlug: normalizedRequestedSlug,
+        message: 'Workspace URL must be 3-50 characters, lowercase letters, numbers, or hyphens, and cannot start/end with hyphen.',
+      })
+      return null
+    }
+
+    const effectiveRequestedSlug = isSlugQuery ? normalizedRequestedSlug : slugifySocietyName(trimmedName)
+    if (!isSlugQuery && (!trimmedName || !effectiveRequestedSlug || !/^[A-Za-z0-9\s\-&.]{3,120}$/.test(trimmedName))) {
+      setSlugAvailability({
+        status: 'idle',
+        requestedSlug: effectiveRequestedSlug,
+        resolvedSlug: '',
+        message: '',
+      })
+      return null
+    }
+
+    setSlugAvailability({
+      status: 'checking',
+      requestedSlug: effectiveRequestedSlug,
+      resolvedSlug: effectiveRequestedSlug,
+      message: 'Checking workspace URL...',
+    })
+
+    try {
+      const endpoint = isSlugQuery
+        ? `/public/society-signup/check-slug?slug=${encodeURIComponent(normalizedRequestedSlug)}`
+        : `/public/society-signup/check-slug?society_name=${encodeURIComponent(trimmedName)}`
+      const response = await apiGet(endpoint)
+
+      const availability = response?.data || {}
+      const resolvedAvailabilitySlug = availability.resolved_slug || effectiveRequestedSlug
+
+      setSlugAvailability({
+        status: availability.available ? 'available' : 'suggested',
+        requestedSlug: availability.requested_slug || effectiveRequestedSlug,
+        resolvedSlug: resolvedAvailabilitySlug,
+        message: availability.message || 'Workspace URL availability updated.',
+      })
+
+      return availability
+    } catch (availabilityError) {
+      setSlugAvailability({
+        status: 'error',
+        requestedSlug: effectiveRequestedSlug,
+        resolvedSlug: effectiveRequestedSlug,
+        message: 'Could not verify workspace URL right now. We will reserve the next available URL during signup.',
+      })
+
+      return null
+    }
+  }
 
   const passwordStrength = useMemo(() => {
     const password = form.password
@@ -216,11 +383,15 @@ export default function SocietySignupPage() {
 
   const validateSignupForm = () => {
     const societyName = form.society_name.trim()
-    if (!form.plan_slug || !PLAN_OPTIONS[form.plan_slug]) {
+    const normalizedCustomSlug = normalizeWorkspaceSlug(customSlug)
+    if (!form.plan_slug || !planOptions[form.plan_slug]) {
       return 'Please select a valid plan.'
     }
     if (!/^[A-Za-z0-9\s\-&.]{3,120}$/.test(societyName)) {
       return 'Society name must be 3-120 characters and can include letters, numbers, spaces, -, &, and .'
+    }
+    if (isCustomSlugEnabled && !/^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/.test(normalizedCustomSlug)) {
+      return 'Workspace URL must be 3-50 characters, lowercase letters, numbers, or hyphens, and cannot start/end with hyphen.'
     }
     if (!/^[A-Za-z\s]{2,80}$/.test(form.city.trim())) {
       return 'City must be 2-80 characters and contain letters only.'
@@ -264,6 +435,7 @@ export default function SocietySignupPage() {
     setLoading(true)
     setError('')
     setSuccess('')
+    setAssignedSetupUrl('')
 
     try {
       const validationError = validateSignupForm()
@@ -271,9 +443,19 @@ export default function SocietySignupPage() {
         throw new Error(validationError)
       }
 
+      const availability = await syncSlugAvailability({
+        societyName: form.society_name,
+        requestedWorkspaceSlug: isCustomSlugEnabled ? customSlug : '',
+      })
+
+      if (isCustomSlugEnabled && availability && availability.available === false) {
+        throw new Error('Requested workspace URL is unavailable. Use the suggested URL or pick another one.')
+      }
+
       const result = await apiPost('/public/society-signup', {
         plan_slug: form.plan_slug,
         society_name: form.society_name.trim(),
+        workspace_slug: isCustomSlugEnabled ? normalizeWorkspaceSlug(customSlug) : null,
         city: form.city.trim(),
         state: form.state,
         country: 'India',
@@ -285,6 +467,7 @@ export default function SocietySignupPage() {
       })
 
       setSuccess('Society created in pending verification. Complete email and mobile verification to activate.')
+      setAssignedSetupUrl(result?.data?.setup_url || '')
 
       if (result?.data?.verification?.email_token_debug) {
         setForm((prev) => ({
@@ -368,54 +551,172 @@ export default function SocietySignupPage() {
         </div>
 
         {error && <p className="mb-4 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-        {success && <p className="mb-4 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">{success}</p>}
+        {success && (
+          <div className="mb-4 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+            <p>{success}</p>
+            {assignedSetupUrl && (
+              <p className="mt-1 text-xs text-green-800">Final workspace URL: {assignedSetupUrl}</p>
+            )}
+          </div>
+        )}
+        {isEnterpriseSignupRequested && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <p className="font-semibold">Enterprise onboarding is handled by our sales team.</p>
+            <p className="mt-1">
+              {ENTERPRISE_PLAN.pricing} with {ENTERPRISE_PLAN.billing.toLowerCase()}. Book a demo for a guided rollout,
+              integration review, and custom proposal. You can also choose a self-serve plan below.
+            </p>
+            <Link href="/book-demo" className="mt-3 inline-flex text-sm font-semibold text-amber-900 underline underline-offset-2">
+              Contact Sales for Enterprise
+            </Link>
+          </div>
+        )}
 
         {step === 1 && (
           <form onSubmit={handleSignup} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Step 1: Signup Details</h2>
 
-            {showPlanSelector ? (
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-primary-800">Choose Your Plan</label>
-                <select
-                  className={fieldClass}
-                  value={form.plan_slug}
-                  onChange={(e) => setForm({ ...form, plan_slug: e.target.value })}
-                  required
-                >
-                  <option value="" disabled>Select a plan</option>
-                  {Object.entries(PLAN_OPTIONS).map(([slug, details]) => (
-                    <option key={slug} value={slug}>{details.label}</option>
-                  ))}
-                </select>
-              </div>
-            ) : (
+            <div className="space-y-1">
+              <label htmlFor="plan_slug" className="text-sm font-medium text-primary-800">Choose Your Plan</label>
+              <select
+                id="plan_slug"
+                className={fieldClass}
+                value={form.plan_slug}
+                onChange={handlePlanChange}
+                required
+              >
+                <option value="" disabled>Select a plan</option>
+                {Object.entries(planOptions).map(([slug, details]) => (
+                  <option key={slug} value={slug}>{details.label}</option>
+                ))}
+              </select>
+              {plansLoading ? <p className="text-xs text-primary-500">Loading plans...</p> : null}
+            </div>
+
+            {selectedPlanDetails ? (
               <div className="rounded-xl border border-primary-200 bg-primary-50 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">Selected Plan</p>
                 <p className="mt-1 text-lg font-semibold text-primary-900">{selectedPlanDetails?.label}</p>
                 <p className="text-sm text-primary-700">{selectedPlanDetails?.pricing}</p>
                 <p className="text-sm text-primary-700">{selectedPlanDetails?.notes}</p>
                 <p className="text-sm text-primary-700">{selectedPlanDetails?.billing}</p>
-                <button
-                  type="button"
-                  className="mt-3 text-sm font-semibold text-primary-800 underline underline-offset-2"
-                  onClick={() => setShowPlanSelector(true)}
-                >
-                  Change Plan
-                </button>
               </div>
-            )}
+            ) : null}
 
             <div className="space-y-1">
-              <label className="text-sm font-medium text-primary-800">Society Name</label>
+              <label htmlFor="society_name" className="text-sm font-medium text-primary-800">Society Name</label>
               <input
+                id="society_name"
                 className={fieldClass}
                 placeholder="e.g. Green Valley Residency"
                 value={form.society_name}
-                onChange={(e) => setForm({ ...form, society_name: e.target.value })}
+                onChange={handleSocietyNameChange}
+                onBlur={() => {
+                  if (!isCustomSlugEnabled) {
+                    void syncSlugAvailability({ societyName: form.society_name, requestedWorkspaceSlug: '' })
+                  }
+                }}
                 required
               />
+              <button
+                type="button"
+                className="text-xs font-semibold text-primary-800 underline underline-offset-2"
+                onClick={() => {
+                  const nextEnabled = !isCustomSlugEnabled
+                  setIsCustomSlugEnabled(nextEnabled)
+                  if (nextEnabled) {
+                    const nextSlug = normalizeWorkspaceSlug(customSlug || derivedSlug)
+                    setCustomSlug(nextSlug)
+                    setIsCustomSlugDirty(customSlug !== '')
+                    setSlugAvailability({
+                      status: 'idle',
+                      requestedSlug: nextSlug,
+                      resolvedSlug: '',
+                      message: '',
+                    })
+                  } else {
+                    setIsCustomSlugDirty(false)
+                    setCustomSlug('')
+                    setSlugAvailability({
+                      status: 'idle',
+                      requestedSlug: derivedSlug,
+                      resolvedSlug: '',
+                      message: '',
+                    })
+                    void syncSlugAvailability({ societyName: form.society_name, requestedWorkspaceSlug: '' })
+                  }
+                }}
+              >
+                {isCustomSlugEnabled ? 'Use Auto-generated URL' : 'Edit Workspace URL'}
+              </button>
+              {isCustomSlugEnabled && (
+                <div className="space-y-1">
+                  <label htmlFor="workspace_slug" className="text-xs font-medium text-primary-800">Workspace URL</label>
+                  <input
+                    id="workspace_slug"
+                    className={fieldClass}
+                    placeholder="e.g. green-valley-residency"
+                    value={customSlug}
+                    onChange={(event) => {
+                      const nextSlug = normalizeWorkspaceSlug(event.target.value)
+                      setCustomSlug(nextSlug)
+                      setIsCustomSlugDirty(true)
+                      setSlugAvailability({
+                        status: 'idle',
+                        requestedSlug: nextSlug,
+                        resolvedSlug: '',
+                        message: '',
+                      })
+                    }}
+                    onBlur={() => {
+                      void syncSlugAvailability({
+                        societyName: form.society_name,
+                        requestedWorkspaceSlug: customSlug,
+                      })
+                    }}
+                    required={isCustomSlugEnabled}
+                  />
+                  <p className="text-xs text-primary-600">Use lowercase letters, numbers, and hyphens only.</p>
+                </div>
+              )}
               <p className="text-xs text-primary-600">Workspace preview: {slugPreview}</p>
+              {slugAvailability.status === 'checking' && (
+                <p className="text-xs text-primary-600">{slugAvailability.message}</p>
+              )}
+              {slugAvailability.status === 'available' && (
+                <p className="text-xs text-green-700">{slugAvailability.message}</p>
+              )}
+              {slugAvailability.status === 'invalid' && (
+                <p className="text-xs text-red-700">{slugAvailability.message}</p>
+              )}
+              {slugAvailability.status === 'suggested' && (
+                <div className="space-y-1">
+                  <p className="text-xs text-amber-700">
+                    {slugAvailability.message} Suggested URL: {APP_BASE}/{resolvedSlug}/setup
+                  </p>
+                  {isCustomSlugEnabled && (
+                    <button
+                      type="button"
+                      className="text-xs font-semibold text-primary-800 underline underline-offset-2"
+                      onClick={() => {
+                        setCustomSlug(resolvedSlug)
+                        setIsCustomSlugDirty(true)
+                        setSlugAvailability({
+                          status: 'available',
+                          requestedSlug: resolvedSlug,
+                          resolvedSlug,
+                          message: 'Workspace URL is available.',
+                        })
+                      }}
+                    >
+                      Use Suggested URL
+                    </button>
+                  )}
+                </div>
+              )}
+              {slugAvailability.status === 'error' && (
+                <p className="text-xs text-amber-700">{slugAvailability.message}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">

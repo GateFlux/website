@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   Check,
@@ -24,7 +24,6 @@ import Container from '../components/Container'
 import FAQ from '../components/FAQ'
 import PricingCalculator from '../components/PricingCalculator'
 import config from '../lib/config'
-import { estimateMonthlyPrice } from '../lib/pricing'
 import { pricingPlans } from '../data/pricingPlans'
 
 const PLAN_ICONS = {
@@ -38,6 +37,26 @@ function getRecommendedPlanByUnits(units) {
   if (units <= 100) return 'starter'
   if (units <= 300) return 'essential'
   return 'professional'
+}
+
+function calculateHybridEstimate(plan, units) {
+  if (!plan || plan.basePrice === null || plan.perUnitPrice === null) {
+    return null
+  }
+
+  return Number(plan.basePrice) + (Number(plan.perUnitPrice) * Number(units || 0))
+}
+
+function mapPublicPlan(pricingPlan) {
+  const slug = String(pricingPlan?.slug || '').toLowerCase()
+  return {
+    slug,
+    planVersion: pricingPlan?.plan_version || null,
+    basePrice: pricingPlan?.base_price,
+    perUnitPrice: pricingPlan?.per_unit_price,
+    trialDays: Number(pricingPlan?.trial_days || 0),
+    maxUnits: pricingPlan?.max_units ?? null,
+  }
 }
 
 // Hero Section
@@ -250,7 +269,7 @@ function PlanCard({ plan, billingCycle, recommendedPlan, calculatorUsed }) {
 }
 
 // Plans Section
-function PlansSection({ billingCycle, onBillingCycleChange, recommendedPlan, calculatorUsed }) {
+function PlansSection({ billingCycle, onBillingCycleChange, recommendedPlan, calculatorUsed, plansData }) {
 
   return (
     <section className="section-padding bg-neutral-50">
@@ -288,7 +307,7 @@ function PlansSection({ billingCycle, onBillingCycleChange, recommendedPlan, cal
         </div>
 
         <div className="grid md:grid-cols-2 xl:grid-cols-5 gap-5 max-w-7xl mx-auto">
-          {pricingPlans.map((plan) => (
+          {plansData.map((plan) => (
             <PlanCard
               key={plan.name}
               plan={plan}
@@ -319,13 +338,14 @@ function TrustIndicatorSection() {
   )
 }
 
-function ExamplePricingSection({ onCalculatorChange }) {
+function ExamplePricingSection({ onCalculatorChange, plansBySlug }) {
   const examples = [50, 100, 200, 500].map((units) => {
-    const plan = getRecommendedPlanByUnits(units)
+    const planSlug = getRecommendedPlanByUnits(units)
+    const estimatedMonthly = calculateHybridEstimate(plansBySlug[planSlug], units)
 
     return {
       units,
-      estimatedMonthly: estimateMonthlyPrice(plan, units),
+      estimatedMonthly,
     }
   })
 
@@ -354,7 +374,9 @@ function ExamplePricingSection({ onCalculatorChange }) {
                     <tr key={row.units} className="border-t border-primary-100">
                       <td className="px-4 py-3 text-sm text-primary-700">{row.units} units</td>
                       <td className="px-4 py-3 text-sm font-semibold text-primary-900">
-                        ₹{Math.round(row.estimatedMonthly).toLocaleString('en-IN')}
+                        {row.estimatedMonthly !== null
+                          ? `₹${Math.round(row.estimatedMonthly).toLocaleString('en-IN')}`
+                          : 'Contact Sales'}
                       </td>
                     </tr>
                   ))}
@@ -363,7 +385,7 @@ function ExamplePricingSection({ onCalculatorChange }) {
             </div>
           </div>
 
-          <PricingCalculator onChange={onCalculatorChange} />
+          <PricingCalculator onChange={onCalculatorChange} planOptions={Object.values(plansBySlug)} />
         </div>
       </Container>
     </section>
@@ -371,13 +393,26 @@ function ExamplePricingSection({ onCalculatorChange }) {
 }
 
 // Feature Comparison Table
-function ComparisonTableSection() {
-  const plans = pricingPlans.map((plan) => plan.name)
+function ComparisonTableSection({ plansData }) {
+  const plans = plansData.map((plan) => plan.name)
+  const planBySlug = plansData.reduce((acc, plan) => {
+    acc[plan.slug] = plan
+    return acc
+  }, {})
 
   // null = custom/unlimited, number = limit, true/false = included/not
   const scaleRows = [
     { label: 'Residential Units', values: ['Up to 25', 'Hybrid', 'Hybrid', 'Hybrid', 'Custom'] },
-    { label: 'Starting Price / Month', values: ['₹0', 'Starts at ₹999', 'Starts at ₹1,999', 'Starts at ₹3,999', 'Custom'] },
+    {
+      label: 'Starting Price / Month',
+      values: [
+        planBySlug.free?.basePrice === null ? 'Custom' : `₹${Math.round(planBySlug.free?.basePrice || 0).toLocaleString('en-IN')}`,
+        planBySlug.starter?.basePrice !== null ? `Starts at ₹${Math.round(planBySlug.starter?.basePrice || 0).toLocaleString('en-IN')}` : 'Custom',
+        planBySlug.essential?.basePrice !== null ? `Starts at ₹${Math.round(planBySlug.essential?.basePrice || 0).toLocaleString('en-IN')}` : 'Custom',
+        planBySlug.professional?.basePrice !== null ? `Starts at ₹${Math.round(planBySlug.professional?.basePrice || 0).toLocaleString('en-IN')}` : 'Custom',
+        'Custom',
+      ],
+    },
     { label: 'Free Trial', values: ['-', '30 days', '30 days', '30 days', '30 days'] },
   ]
 
@@ -385,17 +420,17 @@ function ComparisonTableSection() {
     {
       title: 'Core Operations',
       rows: [
-        { label: 'Resident Management',               values: [false, true, true, true, true] },
+        { label: 'Member Management',                 values: [false, true, true, true, true] },
         { label: 'Visitor Management & Check-in/out', values: [true, true, true, true, true] },
         { label: 'QR Code Entry System',              values: [false, true, true, true, true] },
         { label: 'Notices & Announcements',           values: [true, true, true, true, true] },
-        { label: 'Complaint Management',              values: [true, true, true, true, true] },
+        { label: 'Service Request Management',        values: [true, true, true, true, true] },
         { label: 'Recurring Visitor Management',      values: [false, false, false, true, true] },
         { label: 'Smart Visitor Pre-Approval & Delivery Flow', values: [false, false, false, true, true] },
         { label: 'Package / Parcel Tracking',         values: [false, true, true, true, true] },
         { label: 'Vehicle Registration',              values: [false, true, true, true, true] },
-        { label: 'Resident & Security Mobile Apps',   values: [false, true, true, true, true] },
-        { label: 'Admin Panel Access',                values: [false, true, true, true, true] },
+        { label: 'Member & Security Mobile Apps',     values: [false, true, true, true, true] },
+        { label: 'Society Administration Access',     values: [false, true, true, true, true] },
         { label: 'Multi-Tower Operations',            values: [false, false, false, true, true] },
       ],
     },
@@ -426,6 +461,7 @@ function ComparisonTableSection() {
       rows: [
         { label: 'Events, Polls & Surveys',            values: [false, false, false, true, true] },
         { label: 'Governance & Board Elections',       values: [false, false, false, true, true] },
+        { label: 'Emergency Broadcasts & SOS',         values: [false, false, false, true, true] },
         { label: 'Document Repository',                values: [false, false, true, true, true] },
       ],
     },
@@ -444,6 +480,7 @@ function ComparisonTableSection() {
       title: 'Security & Compliance',
       rows: [
         { label: 'Role-Based Access Control',          values: [false, true, true, true, true] },
+        { label: 'Profile Security (Password & Sessions)', values: [false, true, true, true, true] },
         { label: 'Audit Logs & Activity Tracking',     values: [false, false, true, true, true] },
         { label: 'SMS Notifications',                  values: [false, false, true, true, true] },
         { label: 'Two-Factor Authentication (2FA)',    values: [false, false, false, true, true] },
@@ -454,6 +491,7 @@ function ComparisonTableSection() {
     {
       title: 'Enterprise & Platform',
       rows: [
+        { label: 'Platform Console Operations',        values: [false, false, false, false, true] },
         { label: 'Advanced Integrations',              values: [false, false, false, false, true] },
         { label: 'White-Label Mobile Apps',            values: [false, false, false, false, true] },
         { label: 'Multi-Property Dashboard',           values: [false, false, false, false, true] },
@@ -603,7 +641,7 @@ function AddOnsSection() {
       description: 'Rs299 per 10GB/month.',
     },
     {
-      name: 'Custom reports',
+      name: 'Custom report packs',
       description: 'Rs999/month.',
     },
     {
@@ -622,10 +660,10 @@ function AddOnsSection() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-4 tracking-tight">
-              Optional Modules
+              Optional Add-ons
             </h2>
             <p className="text-primary-600">
-              Extend your platform capabilities with specialized add-on modules.
+              Extend your platform capabilities with specialized add-on services.
             </p>
           </div>
           
@@ -762,7 +800,7 @@ function FAQSection() {
   const faqs = [
     {
       question: 'Is pricing per resident?',
-      answer: 'No. GateFlux pricing is a community-level annual subscription based on the number of residential units (flats/homes), not individual residents. This provides predictable budgeting regardless of occupancy changes.',
+      answer: 'No. GateFlux pricing is a community-level annual subscription based on the number of residential units (flats/homes), not individual members. This provides predictable budgeting regardless of occupancy changes.',
     },
     {
       question: 'Is migration from existing systems supported?',
@@ -774,7 +812,7 @@ function FAQSection() {
     },
     {
       question: 'Is pricing negotiable?',
-      answer: 'Pricing is structured based on unit scale, selected modules, and implementation scope. For communities with specific requirements, we provide customized proposals that reflect the agreed configuration.',
+      answer: 'Pricing is structured based on unit scale, selected modules, and implementation scope. For communities with specific requirements, we provide custom proposals that reflect the agreed society administration configuration.',
     },
     {
       question: 'What payment methods are accepted?',
@@ -814,7 +852,7 @@ function CTASection() {
       <Container className="relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight">
-            Digitize Your Community with Structured Governance Infrastructure
+            Run Community Infrastructure with Structured Governance
           </h2>
           <p className="text-primary-300 mb-8 max-w-xl mx-auto">
             Schedule a consultation to discuss your community's requirements and receive a structured proposal.
@@ -885,6 +923,72 @@ export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState('monthly')
   const [calculatorUsed, setCalculatorUsed] = useState(false)
   const [recommendedPlan, setRecommendedPlan] = useState(null)
+  const [publicPlans, setPublicPlans] = useState([])
+
+  useEffect(() => {
+    let mounted = true
+
+    const loadPublicPlans = async () => {
+      try {
+        const response = await fetch(`${config.api.baseUrl}/public/plans`, {
+          method: 'GET',
+          headers: { Accept: 'application/json' },
+        })
+        const json = await response.json().catch(() => ({}))
+        const rows = Array.isArray(json?.data) ? json.data : []
+
+        if (mounted) {
+          setPublicPlans(rows)
+        }
+      } catch (_error) {
+        if (mounted) {
+          setPublicPlans([])
+        }
+      }
+    }
+
+    void loadPublicPlans()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  const plansData = useMemo(() => {
+    const apiPlansBySlug = publicPlans.reduce((acc, row) => {
+      const mapped = mapPublicPlan(row)
+      if (mapped.slug) {
+        acc[mapped.slug] = mapped
+      }
+      return acc
+    }, {})
+
+    return pricingPlans.map((plan) => {
+      const fromApi = apiPlansBySlug[plan.slug]
+      if (!fromApi) {
+        return plan
+      }
+
+      return {
+        ...plan,
+        basePrice: fromApi.basePrice,
+        perUnitPrice: fromApi.perUnitPrice,
+        startingPrice: fromApi.basePrice,
+        trialDays: fromApi.trialDays,
+        perUnitNote:
+          fromApi.perUnitPrice !== null
+            ? `+ ₹${Math.round(Number(fromApi.perUnitPrice || 0)).toLocaleString('en-IN')} / unit`
+            : plan.perUnitNote,
+      }
+    })
+  }, [publicPlans])
+
+  const plansBySlug = useMemo(() => {
+    return plansData.reduce((acc, plan) => {
+      acc[plan.slug] = plan
+      return acc
+    }, {})
+  }, [plansData])
 
   const handleCalculatorChange = ({ used, units, plan }) => {
     setCalculatorUsed(Boolean(used))
@@ -900,10 +1004,11 @@ export default function PricingPage() {
         onBillingCycleChange={setBillingCycle}
         recommendedPlan={recommendedPlan}
         calculatorUsed={calculatorUsed}
+        plansData={plansData}
       />
       <TrustIndicatorSection />
-      <ExamplePricingSection onCalculatorChange={handleCalculatorChange} />
-      <ComparisonTableSection />
+      <ExamplePricingSection onCalculatorChange={handleCalculatorChange} plansBySlug={plansBySlug} />
+      <ComparisonTableSection plansData={plansData} />
       <AddOnsSection />
       <ImplementationSection />
       <CommitmentSection />

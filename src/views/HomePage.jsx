@@ -47,12 +47,12 @@ function HeroSection() {
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-6">
-              Run your entire residential society from{' '}
+              Run your entire community from{' '}
               <span className="text-primary-200">one platform.</span>
             </h1>
             
             <p className="text-base md:text-lg text-primary-300 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              GateFlux brings security, finance, governance, and community management together in one modern system.
+              GateFlux brings security, finance, member communication, and society administration together in one modern system.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -60,7 +60,7 @@ function HeroSection() {
                 href="/signup"
                 className="btn-primary-lg"
               >
-                Start Free
+                Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link
@@ -536,17 +536,17 @@ function CTASection() {
       <Container className="relative z-10">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 tracking-tight">
-            Digitize Your Community Infrastructure
+            Modernize Your Community Operations
           </h2>
           <p className="text-base text-primary-300 mb-8">
-            Modern residential communities require structured digital infrastructure.
+            GateFlux gives your committee one operating system for secure, accountable day-to-day operations.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/signup"
               className="btn-primary-lg"
             >
-              Start Free
+              Start Free Trial
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
             <Link
