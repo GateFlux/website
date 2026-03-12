@@ -29,11 +29,10 @@ function HeroSection() {
           </span>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5 tracking-tight">
             Built for{' '}
-            <span className="text-primary-200">Structured Communities</span>
+            <span className="text-primary-200">Modern Community Operations</span>
           </h1>
           <p className="text-base md:text-lg text-primary-300 leading-relaxed">
-            GateFlux was created to address operational inefficiencies in modern 
-            residential environments.
+            GateFlux was created to replace fragmented tools with one reliable operating layer for community operations.
           </p>
         </div>
       </Container>
@@ -495,17 +494,17 @@ function CTASection() {
       <Container className="relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to Transform Your Community?
+            Ready to Run Your Community on One Platform?
           </h2>
           <p className="text-lg text-primary-200 mb-8">
-            Be among the first communities to experience smarter, structured management with GateFlux.
+            Be among the first communities to adopt a unified system for security, finance, member communication, and society administration.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/book-demo"
               className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-xl bg-accent-500 text-white hover:bg-accent-600 transition-colors duration-300"
             >
-              Book a Demo
+              Book Demo
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
             <Link

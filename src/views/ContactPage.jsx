@@ -21,7 +21,7 @@ function HeroSection() {
             Talk to the <span className="text-primary-200">GateFlux Team</span>
           </h1>
           <p className="text-base md:text-lg text-primary-300 leading-relaxed">
-            Need help, sales information, partnership details, or support? Send us a message and our team will respond shortly.
+            Need support, sales guidance, partnership details, or implementation help? Send us a message and we’ll route it to the right team.
           </p>
         </div>
       </Container>
@@ -134,7 +134,7 @@ function ContactForm() {
         </div>
 
         <div className="grid sm:grid-cols-2 gap-5">
-          <Input label="Company / Community" name="companyName" value={formData.companyName} onChange={handleChange} />
+          <Input label="Organization / Community" name="companyName" value={formData.companyName} onChange={handleChange} />
           <Select label="Inquiry Type" name="inquiryType" options={inquiryOptions} value={formData.inquiryType} onChange={handleChange} required />
         </div>
 
@@ -182,7 +182,7 @@ function ContactInfo() {
         </div>
       </div>
       <Link href="/book-demo" className="inline-flex items-center gap-2 text-primary-700 hover:text-primary-900 font-medium">
-        Need a product walkthrough? Book a demo <ArrowRight className="h-4 w-4" />
+        Need a platform walkthrough? Book a demo <ArrowRight className="h-4 w-4" />
       </Link>
     </div>
   )

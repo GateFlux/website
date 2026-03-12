@@ -93,13 +93,23 @@ function HeroSection() {
             Platform Capabilities
           </span>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5 tracking-tight">
-            Built Across Four{' '}
-            <span className="text-primary-200">Operational Layers</span>
+            Run your entire residential society from{' '}
+            <span className="text-primary-200">one platform</span>
           </h1>
           <p className="text-base md:text-lg text-primary-300 leading-relaxed">
-            GateFlux is a modern community operating system for residential governance, finance,
-            operations, security, and engagement.
+            GateFlux brings security, finance, governance, and community management together in one modern system.
           </p>
+          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
+            <Link href="/signup?plan=starter" className="btn-primary px-6 py-3">
+              Start Free Trial
+            </Link>
+            <Link
+              href="/book-demo"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold border border-white/30 text-white hover:bg-white/10 transition-colors"
+            >
+              Book Demo
+            </Link>
+          </div>
         </div>
       </Container>
     </section>
@@ -109,10 +119,10 @@ function HeroSection() {
 // Quick Stats
 function QuickStats() {
   const stats = [
-    { icon: Shield, value: '50+', label: 'Operations & Access Controls' },
-    { icon: Users, value: '20+', label: 'Community & Governance Tools' },
-    { icon: CreditCard, value: '15+', label: 'Finance Automations' },
-    { icon: Smartphone, value: '3', label: 'Native Apps' },
+    { icon: Shield, value: '20+', label: 'Tenant Admin Modules' },
+    { icon: Settings, value: '8+', label: 'Platform Console Tools' },
+    { icon: CreditCard, value: '15+', label: 'Finance & Billing Workflows' },
+    { icon: Smartphone, value: '3', label: 'Web + Mobile Surfaces' },
   ]
 
   return (
@@ -175,7 +185,7 @@ function VisitorSecuritySection() {
         <FeatureCategory
           icon={Shield}
           title="Security & Access"
-          description="Control access across gates, deliveries, and vehicles while maintaining a fast, predictable entry flow."
+          description="One layer of the platform focused on gate operations, visitor flow, and controlled access across the community."
           features={features}
         />
       </Container>
@@ -203,7 +213,7 @@ function CommunitySection() {
     },
     {
       icon: MessageSquare,
-      title: 'Service Request Workflow',
+      title: 'Service Requests Workflow',
       description: 'Structured request management with assignment, escalation, and SLA monitoring.',
     },
     {
@@ -291,6 +301,11 @@ function AdminControlSection() {
       description: 'Granular permissions for committee members, managers, accountants, and security.',
     },
     {
+      icon: Shield,
+      title: '2FA, Password & Session Security',
+      description: 'Built-in account protection with 2FA setup, password changes, and active session controls.',
+    },
+    {
       icon: Building,
       title: 'Tower & Unit Configuration',
       description: 'Organize units by towers, blocks, and floors with customizable hierarchies.',
@@ -302,13 +317,13 @@ function AdminControlSection() {
     },
     {
       icon: Settings,
-      title: 'Committee Management Panel',
-      description: 'Dedicated panel for committee members with governance tools.',
+      title: 'Society Settings Workspace',
+      description: 'Dedicated settings sections for profile, compliance, banking, billing, documents, and notifications.',
     },
     {
-      icon: FileText,
-      title: 'Data Export Controls',
-      description: 'Export data with controlled access and format options.',
+      icon: Globe,
+      title: 'Platform Console for Operators',
+      description: 'Platform admins can manage tenants, plans, provider catalog, inbound requests, and system health.',
     },
     {
       icon: BarChart3,
@@ -322,8 +337,8 @@ function AdminControlSection() {
       <Container>
         <FeatureCategory
           icon={Settings}
-          title="Administration & Governance"
-          description="Full control over your community operations. Configure settings, manage access, and gain insights from comprehensive analytics."
+          title="Society Administration & Governance"
+          description="Run governance and administration with role-aware controls, settings workspaces, and clear operational visibility."
           features={features}
           reversed={true}
         />
@@ -379,7 +394,7 @@ function PlatformSection() {
             <SectionHeader
               badge="Platform"
               title="Available Everywhere"
-              subtitle="Access GateFlux from any device. Native apps for members and gate staff, plus a powerful web administration console."
+              subtitle="Access GateFlux from any device. Native apps for members and gate staff, plus a powerful web society administration console."
               centered={false}
               light={true}
             />
@@ -415,7 +430,7 @@ function PlatformSection() {
                 <div className="bg-primary-800 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Smartphone className="h-4 w-4 text-white" />
-                    <span className="text-white font-medium text-sm">Resident App</span>
+                    <span className="text-white font-medium text-sm">Member App</span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-xs text-primary-300">
@@ -469,17 +484,17 @@ function CTASection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
+              href="/signup?plan=starter"
+              className="btn-primary-lg"
+            >
+              Start Free Trial
+            </Link>
+            <Link
               href="/book-demo"
               className="btn-primary-lg group"
             >
-              Book a Demo
+              Book Demo
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              href="/pricing"
-              className="btn-secondary px-8 py-4 text-lg"
-            >
-              View Pricing
             </Link>
           </div>
         </div>

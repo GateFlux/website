@@ -1,7 +1,13 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { estimateMonthlyPrice } from '../lib/pricing'
+import { plans, calculatePlanPrice } from '../../config/plans'
+import { estimateMonthlyPrice as estimateMonthlyPriceFromLib } from '../lib/pricing'
+
+export function estimateMonthlyPrice(planId, units, limits) {
+  return estimateMonthlyPriceFromLib(planId, units, limits)
+}
+
 
 function formatCurrency(value) {
   return `₹${Math.round(value).toLocaleString('en-IN')}`
@@ -11,6 +17,10 @@ function recommendPlan(units) {
   if (units <= 100) return 'starter'
   if (units <= 300) return 'essential'
   return 'professional'
+}
+
+function getPlanId(plan) {
+  return String(plan?.id ?? plan?.slug ?? '').toLowerCase()
 }
 
 function toYearlyFromMonthly(monthlyValue) {
@@ -24,21 +34,44 @@ export default function PricingCalculator({
   showHint = true,
   className = '',
   onChange,
+  planOptions = plans,
 }) {
   const [units, setUnits] = useState(Math.max(minUnits, Math.min(maxUnits, Number(initialUnits) || minUnits)))
 
-  const recommendedPlan = useMemo(() => recommendPlan(units), [units])
-
-  const estimatedMonthlyPrice = useMemo(
-    () => estimateMonthlyPrice(recommendedPlan, units, { minUnits, maxUnits, fallbackUnits: initialUnits }),
-    [recommendedPlan, units, minUnits, maxUnits, initialUnits]
+  const paidPlans = useMemo(
+    () => (Array.isArray(planOptions) ? planOptions.filter((p) => !p.customPricing && getPlanId(p) !== 'free') : []),
+    [planOptions]
+  )
+  const enterprisePlan = useMemo(
+    () => (Array.isArray(planOptions) ? planOptions.find((p) => p.customPricing) : null),
+    [planOptions]
   )
 
-  const estimatedYearlyPrice = useMemo(() => toYearlyFromMonthly(estimatedMonthlyPrice), [estimatedMonthlyPrice])
+  const recommendedPlan = useMemo(() => recommendPlan(units), [units])
+
+  const planPrices = useMemo(
+    () =>
+      paidPlans.map((plan) => {
+        const monthly = calculatePlanPrice(plan, units)
+
+        return {
+          ...plan,
+          monthly,
+          yearly: monthly !== null ? toYearlyFromMonthly(monthly) : null,
+          isRecommended: getPlanId(plan) === recommendedPlan,
+        }
+      }),
+    [units, recommendedPlan, paidPlans]
+  )
+
+  const recommended = planPrices.find((p) => p.id === recommendedPlan)
 
   const emitChange = (safeUnits) => {
     const plan = recommendPlan(safeUnits)
-    const monthlyPrice = estimateMonthlyPrice(plan, safeUnits, { minUnits, maxUnits, fallbackUnits: initialUnits })
+    const selectedPlan = paidPlans.find((item) => getPlanId(item) === plan)
+    const monthlyPrice = selectedPlan
+      ? (calculatePlanPrice(selectedPlan, safeUnits) ?? estimateMonthlyPrice(plan, safeUnits, { minUnits, maxUnits, fallbackUnits: initialUnits }))
+      : estimateMonthlyPrice(plan, safeUnits, { minUnits, maxUnits, fallbackUnits: initialUnits })
 
     onChange?.({
       used: true,
@@ -62,7 +95,7 @@ export default function PricingCalculator({
       <div className="space-y-5">
         <div>
           <label htmlFor="pricing-units-slider" className="block text-sm font-medium text-primary-700 mb-2">
-            Units: {units}
+            Number of Units: {units}
           </label>
           <input
             id="pricing-units-slider"
@@ -74,7 +107,7 @@ export default function PricingCalculator({
             className="w-full"
           />
           <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-3">
-            <label htmlFor="pricing-units-input" className="text-sm text-primary-700">
+            <label htmlFor="pricing-units-input" className="text-sm text-primary-700 sr-only">
               Units
             </label>
             <input
@@ -86,23 +119,50 @@ export default function PricingCalculator({
               onChange={(e) => handleUnitsChange(e.target.value)}
               className="w-32 rounded-md border border-primary-200 px-3 py-2 text-sm"
             />
-            <span className="text-sm text-primary-600">{units} units</span>
           </div>
         </div>
 
-        <div className="rounded-lg bg-white border border-primary-100 p-4">
-          <p className="text-sm text-primary-600">Recommended Plan: <span className="font-semibold text-primary-900 capitalize">{recommendedPlan}</span></p>
-          <p className="text-sm text-primary-600 mt-3">Estimated Monthly Price</p>
-          <p className="text-xl font-bold text-primary-900">{formatCurrency(estimatedMonthlyPrice)}</p>
-          <p className="text-sm text-primary-600 mt-3">Estimated Yearly Price</p>
-          <p className="text-xl font-bold text-primary-900">{formatCurrency(estimatedYearlyPrice)}</p>
+        <div className="rounded-lg bg-white border border-primary-100 divide-y divide-primary-50">
+          {planPrices.map((plan) => (
+            <div
+              key={getPlanId(plan)}
+              className={`flex items-center justify-between px-4 py-3 ${
+                plan.isRecommended ? 'bg-accent-50 border-l-2 border-l-accent-500' : ''
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-primary-800 capitalize">{plan.name}</span>
+                {plan.isRecommended && (
+                  <span className="text-xs font-semibold text-accent-600 bg-accent-100 px-2 py-0.5 rounded-full">
+                    Recommended
+                  </span>
+                )}
+              </div>
+              <span className="text-sm font-bold text-primary-900">
+                {formatCurrency(plan.monthly)} / mo
+              </span>
+            </div>
+          ))}
+          {enterprisePlan && (
+            <div className="flex items-center justify-between px-4 py-3">
+              <span className="text-sm font-medium text-primary-800">Enterprise</span>
+              <span className="text-sm font-semibold text-primary-600">Contact Sales</span>
+            </div>
+          )}
         </div>
+
+        {recommended && (
+          <div className="rounded-lg bg-primary-50 border border-primary-100 p-3">
+            <p className="text-xs text-primary-600 mb-1">Recommended: <span className="font-semibold capitalize">{recommended.name}</span></p>
+            <p className="text-lg font-bold text-primary-900">{formatCurrency(recommended.monthly)} / month</p>
+            <p className="text-xs text-primary-500 mt-0.5">{formatCurrency(recommended.yearly)} billed yearly (save 15%)</p>
+          </div>
+        )}
 
         {showHint && (
           <p className="text-xs text-primary-500">
-            Most societies with 100 units pay around {
-              formatCurrency(estimateMonthlyPrice('starter', 100, { minUnits, maxUnits, fallbackUnits: initialUnits }))
-            }/month.
+            Most societies with 100 units pay around{' '}
+            {formatCurrency(calculatePlanPrice(paidPlans.find((p) => getPlanId(p) === 'starter'), 100))}/month on Starter.
           </p>
         )}
       </div>

@@ -1,16 +1,34 @@
-const PLAN_CONFIG = {
-  starter: { label: 'Starter', base: 999, perUnit: 8 },
-  essential: { label: 'Essential', base: 1999, perUnit: 12 },
-  professional: { label: 'Professional', base: 3999, perUnit: 18 },
+import {
+  plans as planDefinitions,
+  calculatePlanPrice as calcFromPlanObj,
+  getPlanById,
+} from '../../config/plans'
+
+export { planDefinitions as plans, getPlanById }
+
+/**
+ * Calculate the monthly price for a plan by ID slug and unit count.
+ * Returns null for Enterprise (custom pricing).
+ *
+ * @param {string} planId
+ * @param {number} units
+ * @returns {number|null}
+ */
+export function calculatePlanPrice(planId, units) {
+  const plan = getPlanById(planId)
+  return plan ? calcFromPlanObj(plan, units) : null
 }
 
 export function getPlanConfig() {
-  return PLAN_CONFIG
+  return Object.fromEntries(
+    planDefinitions
+      .filter((p) => !p.customPricing)
+      .map((p) => [p.id, { label: p.name, base: p.basePrice, perUnit: p.perUnitPrice }])
+  )
 }
 
 export function estimateMonthlyPrice(plan, units, limits = {}) {
   const normalizedPlan = String(plan || 'starter').toLowerCase()
-  const config = PLAN_CONFIG[normalizedPlan] || PLAN_CONFIG.starter
   const minUnits = Number.isFinite(Number(limits.minUnits)) ? Number(limits.minUnits) : 10
   const maxUnits = Number.isFinite(Number(limits.maxUnits)) ? Number(limits.maxUnits) : 2000
   const fallbackUnits = Number.isFinite(Number(limits.fallbackUnits)) ? Number(limits.fallbackUnits) : 100
@@ -18,5 +36,9 @@ export function estimateMonthlyPrice(plan, units, limits = {}) {
     ? Math.max(minUnits, Math.min(maxUnits, Number(units)))
     : Math.max(minUnits, Math.min(maxUnits, fallbackUnits))
 
-  return config.base + (safeUnits * config.perUnit)
+  const price = calculatePlanPrice(normalizedPlan, safeUnits)
+  if (price === null) {
+    return calculatePlanPrice('starter', safeUnits) ?? 0
+  }
+  return price
 }

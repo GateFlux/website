@@ -28,6 +28,8 @@ import {
   Database,
   Zap,
   AlertTriangle,
+  UserCog,
+  Crown,
 } from 'lucide-react'
 import Container from '../components/Container'
 
@@ -39,6 +41,38 @@ const PLATFORM_TAGS = {
 }
 
 const categories = [
+  {
+    id: 'platform',
+    icon: Crown,
+    title: 'Platform Console',
+    color: 'bg-amber-50 text-amber-600',
+    modules: [
+      {
+        name: 'Platform Overview Dashboard',
+        description: 'Central console for super admins to monitor tenant growth, requests, providers, and platform activity.',
+        capabilities: ['Platform KPI dashboard', 'Cross-tenant analytics summary', 'Operational snapshots for support teams'],
+        platforms: ['web', 'api'],
+      },
+      {
+        name: 'Tenant Lifecycle Management',
+        description: 'Provision, manage, and support tenant societies from a dedicated society administration workspace.',
+        capabilities: ['Tenant CRUD & status updates', 'Invitation resend and onboarding support', 'Tenant-level audit visibility'],
+        platforms: ['web', 'api'],
+      },
+      {
+        name: 'Plans, Requests & Inboxes',
+        description: 'Manage plans and process inbound demand from marketing funnels in one place.',
+        capabilities: ['Plan & pricing administration', 'Demo request management', 'Contact submissions queue'],
+        platforms: ['web', 'api'],
+      },
+      {
+        name: 'Platform Providers & Health',
+        description: 'Configure provider catalog and track platform health endpoints from the same console.',
+        capabilities: ['Provider catalog management', 'Health and uptime checks', 'Platform settings controls'],
+        platforms: ['web', 'api'],
+      },
+    ],
+  },
   {
     id: 'auth',
     icon: Key,
@@ -61,6 +95,12 @@ const categories = [
         name: 'Role-Based Access Control',
         description: 'Granular capability-based permission system with role templates and dynamic navigation scoping.',
         capabilities: ['Role listing & assignment', 'Per-user capability overrides', 'Capability-gated middleware', 'Dynamic navigation per role'],
+        platforms: ['web', 'api'],
+      },
+      {
+        name: 'Profile Security Controls',
+        description: 'Self-service account security pages for password updates, session control, and 2FA setup.',
+        capabilities: ['Change password flow', 'Active session list & revoke', 'Security setup from profile area'],
         platforms: ['web', 'api'],
       },
     ],
@@ -105,8 +145,8 @@ const categories = [
       },
       {
         name: 'Vehicle Management',
-        description: 'Resident vehicle registration and guard-side verification for parking & entry control.',
-        capabilities: ['Vehicle CRUD (resident)', 'Vehicle verify & lookup (guard)', 'Parking integration support'],
+        description: 'Member vehicle registration and guard-side verification for parking & entry control.',
+        capabilities: ['Vehicle CRUD (member)', 'Vehicle verify & lookup (guard)', 'Parking integration support'],
         platforms: ['web', 'api', 'mobile'],
       },
       {
@@ -138,12 +178,12 @@ const categories = [
       {
         name: 'Service Requests',
         description: 'Full request management with category controls, assignment, SLA tracking, attachments, ratings, and analytics.',
-        capabilities: ['Raise / view / update / close complaints', 'Category & staff assignment', 'File attachments & ratings', 'SLA compliance tracking', 'Analytics & escalation heatmap'],
+        capabilities: ['Raise / view / update / close service requests', 'Category & staff assignment', 'File attachments & ratings', 'SLA compliance tracking', 'Analytics & escalation heatmap'],
         platforms: ['web', 'api', 'mobile'],
       },
       {
         name: 'SLA & Escalation Engine',
-        description: 'Configurable SLA timers with automatic escalation rules for overdue complaints.',
+        description: 'Configurable SLA timers with automatic escalation rules for overdue service requests.',
         capabilities: ['SLA configuration CRUD', 'Automatic escalation rules', 'SLA metrics dashboard', 'Manual escalation & history'],
         platforms: ['web', 'api'],
       },
@@ -164,25 +204,25 @@ const categories = [
       {
         name: 'Notices & Announcements',
         description: 'Society-wide notice board with pinned/expired notices, acknowledgment tracking, and comments.',
-        capabilities: ['CRUD notices with pin & expiry', 'Publish / archive lifecycle', 'Resident acknowledgment tracking', 'Comments with pin/unpin'],
+        capabilities: ['CRUD notices with pin & expiry', 'Publish / archive lifecycle', 'Member acknowledgment tracking', 'Comments with pin/unpin'],
         platforms: ['web', 'api', 'mobile'],
       },
       {
         name: 'Polls & Voting',
         description: 'Community polls with multiple options, voting, and real-time result tracking.',
         capabilities: ['Create / publish / close polls', 'Add/remove options', 'Cast & remove votes', 'Results view'],
-        platforms: ['api'],
+        platforms: ['web', 'api'],
       },
       {
         name: 'Events',
         description: 'Society events with RSVP management, calendar view, and attendance tracking.',
         capabilities: ['Create / publish / cancel / complete', 'RSVP & cancel RSVP', 'Calendar view & attendee list'],
-        platforms: ['api'],
+        platforms: ['web', 'api'],
       },
       {
         name: 'Emergency Broadcasts',
-        description: 'Critical emergency alerts with SOS panic button and resident acknowledgment.',
-        capabilities: ['Create & broadcast emergencies', 'One-tap panic SOS (guard)', 'Resident acknowledgment tracking', 'Activity timeline & dashboard'],
+        description: 'Critical emergency alerts with SOS panic button and member acknowledgment.',
+        capabilities: ['Create & broadcast emergencies', 'One-tap panic SOS (guard)', 'Member acknowledgment tracking', 'Activity timeline & dashboard'],
         platforms: ['api', 'mobile'],
       },
       {
@@ -329,7 +369,7 @@ const categories = [
       },
       {
         name: 'Custom Reports',
-        description: 'Exportable reports for visitor logs, financials, complaints, and staff attendance.',
+        description: 'Exportable reports for visitor logs, financials, service requests, and staff attendance.',
         capabilities: ['Date range & filter support', 'Excel & PDF export', 'Scheduled email reports', 'Custom column selection'],
         platforms: ['web', 'api'],
       },
@@ -374,7 +414,7 @@ const categories = [
     color: 'bg-slate-50 text-slate-600',
     modules: [
       {
-        name: 'Resident App',
+        name: 'Member App',
         description: 'iOS & Android app for members to manage community updates, payments, service requests, and amenities.',
         capabilities: ['Community feed & announcements', 'Maintenance billing & payments', 'Service requests', 'Amenity booking', 'Operational alerts'],
         platforms: ['mobile'],
@@ -384,6 +424,38 @@ const categories = [
         description: 'Dedicated gate app for access control, visitor check-ins, delivery handling, and shift operations.',
         capabilities: ['Access verification', 'Manual entry', 'Check-in / check-out flow', 'Delivery handling', 'Shift handover support'],
         platforms: ['mobile'],
+      },
+    ],
+  },
+  {
+    id: 'administration',
+    icon: UserCog,
+    title: 'Society Administration Workspace',
+    color: 'bg-sky-50 text-sky-600',
+    modules: [
+      {
+        name: 'Society Settings Workspace',
+        description: 'Structured society administration area covering profile, contact, compliance, banking, and operational settings.',
+        capabilities: ['General profile setup', 'Contact and compliance details', 'Banking and payment method configuration'],
+        platforms: ['web', 'api'],
+      },
+      {
+        name: 'Billing & Subscription Settings',
+        description: 'Dedicated settings pages to manage billing behavior, invoice preferences, and subscription controls.',
+        capabilities: ['Invoice and billing preferences', 'Subscription settings tab', 'Billing-specific configuration pages'],
+        platforms: ['web', 'api'],
+      },
+      {
+        name: 'Document & Notification Controls',
+        description: 'Admin-level settings for society document governance and notification behaviors.',
+        capabilities: ['Documents settings section', 'Notification settings section', 'Policy-aligned admin controls'],
+        platforms: ['web', 'api'],
+      },
+      {
+        name: 'User Preferences & Help',
+        description: 'Per-user preferences and in-app help center access for tenant users and admins.',
+        capabilities: ['Personal preference management', 'In-app help and guidance', 'Role-aware access to support content'],
+        platforms: ['web'],
       },
     ],
   },
@@ -451,17 +523,17 @@ function HeroSection() {
       <Container className="relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5 tracking-tight leading-tight">
-            Community Operating System — Every Module
+            The modern operating system for residential communities
           </h1>
           <p className="text-base md:text-lg text-primary-300 leading-relaxed mb-8 max-w-2xl mx-auto">
-            GateFlux is a full-stack society management platform. Explore every module
-            across operations, finance, governance, community, and infrastructure.
+            Explore every module across operations, finance, governance, community,
+            infrastructure, and platform operations.
           </p>
           <Link
             href="/book-demo"
             className="inline-flex items-center gap-2 bg-accent-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-accent-600 transition-colors"
           >
-            Book a Demo
+            Book Demo
             <ArrowRight className="h-5 w-5" />
           </Link>
         </div>
@@ -549,7 +621,7 @@ export default function ModulesPage() {
               href="/book-demo"
               className="inline-flex items-center gap-2 bg-accent-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-accent-600 transition-colors"
             >
-              Book a Demo
+              Book Demo
               <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
