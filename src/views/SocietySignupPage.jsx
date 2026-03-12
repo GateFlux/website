@@ -59,7 +59,6 @@ function formatCurrency(value) {
 
 function mapPublicPlanToOption(plan) {
   const slug = String(plan?.slug || '').toLowerCase()
-  const version = plan?.plan_version ? ` (${String(plan.plan_version).toLowerCase()})` : ''
   const basePrice = plan?.base_price
   const perUnitPrice = plan?.per_unit_price
   const trialDays = Number(plan?.trial_days || 30)
@@ -67,7 +66,7 @@ function mapPublicPlanToOption(plan) {
 
   return {
     slug,
-    label: `${plan?.display_name || plan?.name || slug}${version}`,
+    label: plan?.display_name || plan?.name || slug,
     pricing: isCustom ? 'Contact Sales' : `${formatCurrency(basePrice)}/month base`,
     notes: isCustom ? 'Custom pricing' : `${formatCurrency(perUnitPrice)} per unit`,
     billing: trialDays > 0 ? `${trialDays}-day trial included` : 'Billing monthly',
