@@ -58,7 +58,7 @@ export default function VerifyAccountPage({ focusStep = 'all' }) {
 
   const redirectUrl = useMemo(() => {
     const slug = status?.tenant_slug || ''
-    return slug ? `${APP_BASE}/${slug}/setup` : `${APP_BASE}/auth/login`
+    return slug ? `${APP_BASE}/${slug}/setup` : `${APP_BASE}/login`
   }, [status])
 
   const fetchStatus = async () => {

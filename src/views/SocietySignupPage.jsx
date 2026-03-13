@@ -519,7 +519,7 @@ export default function SocietySignupPage() {
         password_confirmation: form.password_confirmation,
       })
 
-      const redirectUrl = completion?.data?.redirect_url || `${APP_BASE}/auth/login`
+      const redirectUrl = completion?.data?.redirect_url || `${APP_BASE}/login`
       setSuccess('Account verified successfully. Redirecting to your setup workspace...')
       window.location.assign(redirectUrl)
     } catch (err) {

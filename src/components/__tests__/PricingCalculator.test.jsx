@@ -4,12 +4,12 @@ import PricingCalculator, { estimateMonthlyPrice } from '../PricingCalculator'
 
 describe('estimateMonthlyPrice', () => {
   it('uses starter plan when plan is unknown', () => {
-    expect(estimateMonthlyPrice('unknown', 100)).toBe(1999)
+    expect(estimateMonthlyPrice('unknown', 100)).toBe(1799)
   })
 
   it('respects provided min/max unit limits', () => {
-    expect(estimateMonthlyPrice('starter', 0, { minUnits: 1, maxUnits: 5000 })).toBe(1009)
-    expect(estimateMonthlyPrice('professional', 7000, { minUnits: 1, maxUnits: 5000 })).toBe(33999)
+    expect(estimateMonthlyPrice('starter', 0, { minUnits: 1, maxUnits: 5000 })).toBe(1007)
+    expect(estimateMonthlyPrice('professional', 7000, { minUnits: 1, maxUnits: 5000 })).toBe(93999)
   })
 })
 
@@ -28,8 +28,8 @@ describe('PricingCalculator', () => {
     fireEvent.change(numberInput, { target: { value: '6000' } })
 
     expect(numberInput).toHaveValue(5000)
-    expect(screen.getByText(/₹50,999\s*\/\s*mo/i)).toBeInTheDocument()
-    expect(screen.getByText(/₹33,999\s*\/\s*month/i)).toBeInTheDocument()
+    expect(screen.getByText(/₹40,999\s*\/\s*mo/i)).toBeInTheDocument()
+    expect(screen.getByText(/₹93,999\s*\/\s*month/i)).toBeInTheDocument()
   })
 
   it('updates recommended plan and emits normalized values via onChange', () => {
@@ -42,8 +42,8 @@ describe('PricingCalculator', () => {
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
       plan: 'essential',
       units: 300,
-      monthlyPrice: 4399,
+      monthlyPrice: 5599,
     }))
-    expect(screen.getByText(/₹4,399\s*\/\s*month/i)).toBeInTheDocument()
+    expect(screen.getByText(/₹5,599\s*\/\s*month/i)).toBeInTheDocument()
   })
 })
