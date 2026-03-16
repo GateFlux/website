@@ -5,10 +5,20 @@ import Script from 'next/script'
 import { useSearchParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import config from '../lib/config'
+import { extractVerificationToken } from '../lib/verificationToken'
 
 const API_BASE = config.api.baseUrl
 const APP_BASE = config.app.baseUrl
 const RECAPTCHA_SITE_KEY = config.recaptcha.siteKey
+
+function canAutoFillLocalOtp() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const host = window.location.hostname.toLowerCase()
+  return host === 'localhost' || host === '127.0.0.1' || host.endsWith('.test')
+}
 
 async function apiPost(path, payload) {
   const response = await fetch(`${API_BASE}${path}`, {
@@ -93,7 +103,17 @@ export default function VerifyAccountPage({ focusStep = 'all' }) {
     setSuccess('')
 
     try {
-      await apiPost('/public/society-signup/verify-email', { token: emailToken })
+      const verificationToken = extractVerificationToken(emailToken)
+      if (verificationToken.length < 20) {
+        throw new Error('Please paste the full email verification token or full verification link from your email.')
+      }
+
+      await apiPost('/public/society-signup/verify-email', { token: verificationToken })
+
+      if (verificationToken !== emailToken) {
+        setEmailToken(verificationToken)
+      }
+
       await fetchStatus()
       setSuccess('Email verified successfully.')
     } catch (err) {
@@ -110,14 +130,10 @@ export default function VerifyAccountPage({ focusStep = 'all' }) {
 
     try {
       const recaptchaToken = await executeRecaptcha('resend_email')
-      const response = await apiPost('/public/society-signup/resend-email', {
+      await apiPost('/public/society-signup/resend-email', {
         email: email.trim().toLowerCase(),
         recaptcha_token: recaptchaToken,
       })
-
-      if (response?.data?.email_token_debug) {
-        setEmailToken(response.data.email_token_debug)
-      }
 
       setSuccess('Verification email resent successfully.')
     } catch (err) {
@@ -159,8 +175,8 @@ export default function VerifyAccountPage({ focusStep = 'all' }) {
         recaptcha_token: recaptchaToken,
       })
 
-      if (response?.data?.otp_debug) {
-        setOtp(response.data.otp_debug)
+      if (canAutoFillLocalOtp() && response?.data?.otp_debug) {
+        setOtp(String(response.data.otp_debug))
       }
 
       setSuccess('New OTP sent successfully.')
@@ -224,7 +240,7 @@ export default function VerifyAccountPage({ focusStep = 'all' }) {
         {(focusStep === 'all' || focusStep === 'email') && !status.email_verified && (
           <form onSubmit={handleVerifyEmail} className={`${cardClass} mb-4`}>
             <h2 className="text-lg font-semibold text-primary-900">Verify Email</h2>
-            <input className={fieldClass} placeholder="Enter email verification token" value={emailToken} onChange={(e) => setEmailToken(e.target.value)} required />
+            <input className={fieldClass} placeholder="Paste token or full verification link" value={emailToken} onChange={(e) => setEmailToken(e.target.value)} required />
             <div className="flex flex-wrap gap-2">
               <button className={primaryButtonClass} type="submit" disabled={loading}>{loading ? 'Verifying...' : 'Verify Email'}</button>
               <button type="button" className="rounded-lg border border-primary-300 px-4 py-2 text-sm font-semibold text-primary-800" onClick={handleResendEmail} disabled={loading}>Resend Email</button>

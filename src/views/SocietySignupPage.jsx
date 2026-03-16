@@ -5,10 +5,20 @@ import Script from 'next/script'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import config from '../lib/config'
+import { extractVerificationToken } from '../lib/verificationToken'
 
 const API_BASE = config.api.baseUrl
 const APP_BASE = config.app.baseUrl
 const RECAPTCHA_SITE_KEY = config.recaptcha.siteKey
+
+function canAutoFillLocalOtp() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const host = window.location.hostname.toLowerCase()
+  return host === 'localhost' || host === '127.0.0.1' || host.endsWith('.test')
+}
 
 const INDIAN_STATES_AND_UTS = [
   'Andhra Pradesh',
@@ -468,13 +478,11 @@ export default function SocietySignupPage() {
       setSuccess('Society created in pending verification. Complete email and mobile verification to activate.')
       setAssignedSetupUrl(result?.data?.setup_url || '')
 
-      if (result?.data?.verification?.email_token_debug) {
-        setForm((prev) => ({
-          ...prev,
-          email_token: result.data.verification.email_token_debug,
-          phone_otp: result.data.verification.otp_debug || prev.phone_otp,
-        }))
-      }
+      setForm((prev) => ({
+        ...prev,
+        email_token: '',
+        phone_otp: canAutoFillLocalOtp() ? (result?.data?.verification?.otp_debug || '') : '',
+      }))
 
       setStep(2)
     } catch (err) {
@@ -490,9 +498,22 @@ export default function SocietySignupPage() {
     setError('')
 
     try {
+      const verificationToken = extractVerificationToken(form.email_token)
+      if (verificationToken.length < 20) {
+        throw new Error('Please paste the full email verification token or full verification link from your email.')
+      }
+
       await apiPost('/public/society-signup/verify-email', {
-        token: form.email_token,
+        token: verificationToken,
       })
+
+      if (verificationToken !== form.email_token) {
+        setForm((prev) => ({
+          ...prev,
+          email_token: verificationToken,
+        }))
+      }
+
       setSuccess('Email verified. Enter mobile OTP to complete account activation.')
       setStep(3)
     } catch (err) {
@@ -888,10 +909,10 @@ export default function SocietySignupPage() {
         {step === 2 && (
           <form onSubmit={handleVerifyEmail} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Step 2: Verify Email</h2>
-            <label className="text-sm text-primary-700">Email Verification Token</label>
+            <label className="text-sm text-primary-700">Email Verification Token or Link</label>
             <input
               className={fieldClass}
-              placeholder="Paste token from email"
+              placeholder="Paste token or full verification link from email"
               value={form.email_token}
               onChange={(e) => setForm({ ...form, email_token: e.target.value })}
               required
