@@ -73,7 +73,6 @@ function mapPublicPlanToOption(plan) {
   const perUnitPrice = plan?.per_unit_price
   const trialDays = Number(plan?.trial_days || 30)
   const isCustom = basePrice === null || perUnitPrice === null || slug === 'enterprise'
-
   return {
     slug,
     label: plan?.display_name || plan?.name || slug,
@@ -268,7 +267,7 @@ export default function SocietySignupPage() {
   }, [form.plan_slug, planOptions])
 
   const handlePlanChange = (event) => {
-    const nextPlan = event.target.value
+    const nextPlan = String(event.target.value || '').toLowerCase()
 
     setForm((prev) => ({ ...prev, plan_slug: nextPlan }))
   }

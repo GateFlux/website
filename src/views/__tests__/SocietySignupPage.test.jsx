@@ -10,6 +10,7 @@ function buildPublicPlansResponse() {
     success: true,
     data: [
       {
+        id: 'cd161563-54c7-48a8-8597-617409b199a4',
         slug: 'free',
         name: 'Free',
         display_name: 'Free',
@@ -19,6 +20,7 @@ function buildPublicPlansResponse() {
         trial_days: 30,
       },
       {
+        id: 'd4491691-ccd4-43d5-8e7b-a163bb524b81',
         slug: 'starter',
         name: 'Starter',
         display_name: 'Starter',
@@ -28,6 +30,7 @@ function buildPublicPlansResponse() {
         trial_days: 30,
       },
       {
+        id: '193daaa1-a465-4fce-a984-e1b4a253d03f',
         slug: 'essential',
         name: 'Essential',
         display_name: 'Essential',
@@ -37,6 +40,7 @@ function buildPublicPlansResponse() {
         trial_days: 30,
       },
       {
+        id: '2c945391-de1f-431d-a895-9e6b97d12bbe',
         slug: 'professional',
         name: 'Professional',
         display_name: 'Professional',
@@ -46,6 +50,7 @@ function buildPublicPlansResponse() {
         trial_days: 30,
       },
       {
+        id: 'f7f96d0b-30fe-4fc7-9ec4-b72fb2bcf86d',
         slug: 'enterprise',
         name: 'Enterprise',
         display_name: 'Enterprise',
@@ -172,7 +177,7 @@ describe('SocietySignupPage', () => {
     const selectedPlanCard = screen.getByText(/selected plan/i).closest('div')
 
     expect(selectedPlanCard).not.toBeNull()
-    expect(within(selectedPlanCard).getByText('Starter (v1)')).toBeInTheDocument()
+    expect(within(selectedPlanCard).getByText('Starter')).toBeInTheDocument()
     expect(within(selectedPlanCard).getByText('₹999/month base')).toBeInTheDocument()
     expect(planSelect).toHaveValue('starter')
   })
@@ -188,7 +193,7 @@ describe('SocietySignupPage', () => {
 
     expect(screen.getByLabelText(/choose your plan/i)).toHaveValue('essential')
     expect(selectedPlanCard).not.toBeNull()
-    expect(within(selectedPlanCard).getByText('Essential (v1)')).toBeInTheDocument()
+    expect(within(selectedPlanCard).getByText('Essential')).toBeInTheDocument()
     expect(within(selectedPlanCard).getByText('₹1,999/month base')).toBeInTheDocument()
   })
 
