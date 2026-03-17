@@ -26,6 +26,7 @@ describe('PricingCalculator', () => {
 
     const numberInput = screen.getByLabelText(/^units$/i)
     fireEvent.change(numberInput, { target: { value: '6000' } })
+    fireEvent.blur(numberInput)
 
     expect(numberInput).toHaveValue(5000)
     expect(screen.getByText(/₹40,999\s*\/\s*mo/i)).toBeInTheDocument()
@@ -45,5 +46,19 @@ describe('PricingCalculator', () => {
       monthlyPrice: 5599,
     }))
     expect(screen.getByText(/₹5,599\s*\/\s*month/i)).toBeInTheDocument()
+  })
+
+  it('allows clearing and retyping units without forcing min value mid-edit', () => {
+    render(<PricingCalculator minUnits={10} maxUnits={2000} initialUnits={100} showHint={false} />)
+
+    const numberInput = screen.getByLabelText(/^units$/i)
+
+    fireEvent.change(numberInput, { target: { value: '' } })
+    expect(numberInput).toHaveValue(null)
+
+    fireEvent.change(numberInput, { target: { value: '114' } })
+
+    expect(numberInput).toHaveValue(114)
+    expect(screen.getByText(/Number of Units:\s*114/i)).toBeInTheDocument()
   })
 })

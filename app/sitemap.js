@@ -29,6 +29,12 @@ export default function sitemap() {
       priority: 0.9,
     },
     {
+      url: `${BASE_URL}/signup`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
       url: `${BASE_URL}/security`,
       lastModified: new Date(),
       changeFrequency: 'monthly',

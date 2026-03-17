@@ -37,6 +37,7 @@ export default function PricingCalculator({
   planOptions = plans,
 }) {
   const [units, setUnits] = useState(Math.max(minUnits, Math.min(maxUnits, Number(initialUnits) || minUnits)))
+  const [unitsInputValue, setUnitsInputValue] = useState(String(Math.max(minUnits, Math.min(maxUnits, Number(initialUnits) || minUnits))))
 
   const paidPlans = useMemo(
     () => (Array.isArray(planOptions) ? planOptions.filter((p) => !p.customPricing && getPlanId(p) !== 'free') : []),
@@ -83,8 +84,36 @@ export default function PricingCalculator({
   }
 
   const handleUnitsChange = (nextUnits) => {
-    const safeUnits = Math.max(minUnits, Math.min(maxUnits, Number(nextUnits) || minUnits))
+    const parsedUnits = Number(nextUnits)
+    const safeUnits = Math.max(minUnits, Math.min(maxUnits, parsedUnits || minUnits))
     setUnits(safeUnits)
+    setUnitsInputValue(String(safeUnits))
+    emitChange(safeUnits)
+  }
+
+  const handleUnitsInputChange = (event) => {
+    const nextValue = String(event.target.value || '')
+    setUnitsInputValue(nextValue)
+
+    if (nextValue === '') {
+      return
+    }
+
+    const parsedUnits = Number(nextValue)
+    if (!Number.isFinite(parsedUnits)) {
+      return
+    }
+
+    const boundedUnits = Math.min(maxUnits, parsedUnits)
+    setUnits(boundedUnits)
+    emitChange(boundedUnits)
+  }
+
+  const handleUnitsInputBlur = () => {
+    const parsedUnits = Number(unitsInputValue)
+    const safeUnits = Math.max(minUnits, Math.min(maxUnits, Number.isFinite(parsedUnits) ? parsedUnits : minUnits))
+    setUnits(safeUnits)
+    setUnitsInputValue(String(safeUnits))
     emitChange(safeUnits)
   }
 
@@ -115,8 +144,9 @@ export default function PricingCalculator({
               type="number"
               min={minUnits}
               max={maxUnits}
-              value={units}
-              onChange={(e) => handleUnitsChange(e.target.value)}
+              value={unitsInputValue}
+              onChange={handleUnitsInputChange}
+              onBlur={handleUnitsInputBlur}
               className="w-32 rounded-md border border-primary-200 px-3 py-2 text-sm"
             />
           </div>
