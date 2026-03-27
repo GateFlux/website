@@ -5,10 +5,26 @@ import Script from 'next/script'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import config from '../lib/config'
+import { extractVerificationToken } from '../lib/verificationToken'
 
 const API_BASE = config.api.baseUrl
 const APP_BASE = config.app.baseUrl
 const RECAPTCHA_SITE_KEY = config.recaptcha.siteKey
+
+function canAutoFillLocalOtp() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const host = window.location.hostname.toLowerCase()
+
+  if (host === 'localhost' || host.endsWith('.localhost') || host === '127.0.0.1' || host === '::1' || host === '0.0.0.0' || host.endsWith('.local') || host.endsWith('.test')) {
+    return true
+  }
+
+  const privateIpv4 = /^(10\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})|192\.168\.(\d{1,3})\.(\d{1,3})|172\.(1[6-9]|2\d|3[0-1])\.(\d{1,3})\.(\d{1,3}))$/
+  return privateIpv4.test(host)
+}
 
 const INDIAN_STATES_AND_UTS = [
   'Andhra Pradesh',
@@ -59,15 +75,13 @@ function formatCurrency(value) {
 
 function mapPublicPlanToOption(plan) {
   const slug = String(plan?.slug || '').toLowerCase()
-  const version = plan?.plan_version ? ` (${String(plan.plan_version).toLowerCase()})` : ''
   const basePrice = plan?.base_price
   const perUnitPrice = plan?.per_unit_price
   const trialDays = Number(plan?.trial_days || 30)
   const isCustom = basePrice === null || perUnitPrice === null || slug === 'enterprise'
-
   return {
     slug,
-    label: `${plan?.display_name || plan?.name || slug}${version}`,
+    label: plan?.display_name || plan?.name || slug,
     pricing: isCustom ? 'Contact Sales' : `${formatCurrency(basePrice)}/month base`,
     notes: isCustom ? 'Custom pricing' : `${formatCurrency(perUnitPrice)} per unit`,
     billing: trialDays > 0 ? `${trialDays}-day trial included` : 'Billing monthly',
@@ -97,6 +111,28 @@ function normalizeWorkspaceSlug(value) {
     .replace(/^-+|-+$/g, '')
 }
 
+function extractApiErrorMessage(payload, fallbackMessage = 'Request failed') {
+  const errors = payload?.errors
+
+  if (errors && typeof errors === 'object') {
+    const firstFieldValue = Object.values(errors)[0]
+
+    if (Array.isArray(firstFieldValue) && firstFieldValue.length > 0) {
+      const firstMessage = String(firstFieldValue[0] || '').trim()
+      if (firstMessage) {
+        return firstMessage
+      }
+    }
+
+    if (typeof firstFieldValue === 'string' && firstFieldValue.trim()) {
+      return firstFieldValue.trim()
+    }
+  }
+
+  const rawMessage = String(payload?.message || '').trim()
+  return rawMessage || fallbackMessage
+}
+
 async function apiPost(path, payload) {
   const response = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
@@ -110,7 +146,7 @@ async function apiPost(path, payload) {
   const data = await response.json().catch(() => ({}))
 
   if (!response.ok) {
-    const message = data?.message || 'Request failed'
+    const message = extractApiErrorMessage(data, 'Request failed')
     throw new Error(message)
   }
 
@@ -128,7 +164,7 @@ async function apiGet(path) {
   const data = await response.json().catch(() => ({}))
 
   if (!response.ok) {
-    const message = data?.message || 'Request failed'
+    const message = extractApiErrorMessage(data, 'Request failed')
     throw new Error(message)
   }
 
@@ -145,7 +181,12 @@ async function executeRecaptcha(action) {
 
 export default function SocietySignupPage() {
   const searchParams = useSearchParams()
-  const [step, setStep] = useState(1)
+    const prefilledEmail = searchParams.get('email') || ''
+    const prefilledToken = searchParams.get('token') || ''
+    const isReentry = Boolean(prefilledEmail)
+    const reentryAttemptedRef = useRef(false)
+    const [step, setStep] = useState(1)
+    const [phoneAlreadyVerified, setPhoneAlreadyVerified] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -164,6 +205,12 @@ export default function SocietySignupPage() {
   const [planOptions, setPlanOptions] = useState({})
   const [plansLoading, setPlansLoading] = useState(true)
   const stateDropdownRef = useRef(null)
+
+  // Existing user authentication flow state
+  const [signupMode, setSignupMode] = useState('') // 'new_user_signup' or 'existing_user_requires_auth'
+  const [existingUserToken, setExistingUserToken] = useState('')
+  const [existingUserPassword, setExistingUserPassword] = useState('')
+  const [existingUserReason, setExistingUserReason] = useState('')
 
   const requestedPlan = useMemo(() => (searchParams.get('plan') || '').toLowerCase(), [searchParams])
   const isEnterpriseSignupRequested = requestedPlan === 'enterprise'
@@ -217,12 +264,12 @@ export default function SocietySignupPage() {
     country: 'India',
     unit_count: 100,
     admin_name: '',
-    admin_email: '',
+      admin_email: prefilledEmail,
     admin_phone: '',
     password: '',
     password_confirmation: '',
     terms_accepted: false,
-    email_token: '',
+      email_token: prefilledToken,
     phone_otp: '',
   })
 
@@ -231,6 +278,62 @@ export default function SocietySignupPage() {
       setForm((prev) => ({ ...prev, plan_slug: preselectedPlan }))
     }
   }, [preselectedPlan])
+
+    useEffect(() => {
+      if (!prefilledEmail || reentryAttemptedRef.current) {
+        return
+      }
+
+      reentryAttemptedRef.current = true
+
+      const restoreReentry = async () => {
+        setLoading(true)
+        setError('')
+
+        try {
+          if (prefilledToken) {
+            const verificationToken = extractVerificationToken(prefilledToken)
+            if (verificationToken.length >= 20) {
+              try {
+                await apiPost('/public/society-signup/verify-email', { token: verificationToken })
+              } catch (_e) {
+                // token may already be used; continue to status check
+              }
+            }
+          }
+
+          const response = await apiPost('/public/society-signup/status', {
+            email: prefilledEmail.trim().toLowerCase(),
+          })
+          const statusData = response?.data || {}
+
+          if (canAutoFillLocalOtp() && statusData?.otp_debug) {
+            setForm((prev) => ({
+              ...prev,
+              phone_otp: String(statusData.otp_debug),
+            }))
+          }
+
+          if (statusData.phone_verified) {
+            setPhoneAlreadyVerified(true)
+            setStep(3)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          } else if (statusData.email_verified) {
+            setStep(3)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          } else {
+            setStep(2)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }
+        } catch (err) {
+          setError('Could not load verification status. Please check your email or try again.')
+        } finally {
+          setLoading(false)
+        }
+      }
+
+      void restoreReentry()
+    }, [prefilledEmail, prefilledToken])
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -258,10 +361,51 @@ export default function SocietySignupPage() {
     return form.plan_slug ? planOptions[form.plan_slug] : null
   }, [form.plan_slug, planOptions])
 
+  const monthlyEstimate = useMemo(() => {
+    if (!selectedPlanDetails) {
+      return null
+    }
+
+    const basePrice = Number(selectedPlanDetails.base_price)
+    const perUnitPrice = Number(selectedPlanDetails.per_unit_price)
+    const units = Number(form.unit_count)
+
+    if (!Number.isFinite(basePrice) || !Number.isFinite(perUnitPrice)) {
+      return null
+    }
+
+    if (!Number.isInteger(units) || units < 1) {
+      return null
+    }
+
+    const total = basePrice + (perUnitPrice * units)
+
+    return {
+      total,
+      basePrice,
+      perUnitPrice,
+      units,
+    }
+  }, [form.unit_count, selectedPlanDetails])
+
   const handlePlanChange = (event) => {
-    const nextPlan = event.target.value
+    const nextPlan = String(event.target.value || '').toLowerCase()
 
     setForm((prev) => ({ ...prev, plan_slug: nextPlan }))
+  }
+
+  const handleUnitCountChange = (event) => {
+    const nextValue = String(event.target.value || '')
+
+    if (nextValue === '' || /^\d+$/.test(nextValue)) {
+      setForm((prev) => ({ ...prev, unit_count: nextValue }))
+    }
+  }
+
+  const handleUnitCountBlur = () => {
+    const parsedUnits = Number(form.unit_count)
+    const safeUnits = Math.max(1, Math.min(10000, Number.isFinite(parsedUnits) ? parsedUnits : 1))
+    setForm((prev) => ({ ...prev, unit_count: String(safeUnits) }))
   }
 
   const handleSocietyNameChange = (event) => {
@@ -417,18 +561,21 @@ export default function SocietySignupPage() {
     if (!/^[6-9][0-9]{9}$/.test(form.admin_phone.trim())) {
       return 'Mobile number must be a valid 10-digit Indian number starting with 6-9.'
     }
-    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(form.password)) {
-      return 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.'
-    }
-    if (form.password !== form.password_confirmation) {
-      return 'Password and confirm password do not match.'
-    }
-    if (!form.terms_accepted) {
-      return 'Please accept Terms of Service and Privacy Policy.'
-    }
-
     return ''
   }
+
+    const validateCompletionFields = () => {
+      if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(form.password)) {
+        return 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.'
+      }
+      if (form.password !== form.password_confirmation) {
+        return 'Password and confirm password do not match.'
+      }
+      if (!form.terms_accepted) {
+        return 'Please accept Terms of Service and Privacy Policy.'
+      }
+      return ''
+    }
 
   const handleSignup = async (event) => {
     event.preventDefault()
@@ -436,6 +583,7 @@ export default function SocietySignupPage() {
     setError('')
     setSuccess('')
     setAssignedSetupUrl('')
+    setSignupMode('')
 
     try {
       const validationError = validateSignupForm()
@@ -466,18 +614,128 @@ export default function SocietySignupPage() {
         recaptcha_token: await executeRecaptcha('signup'),
       })
 
-      setSuccess('Society created in pending verification. Complete email and mobile verification to activate.')
-      setAssignedSetupUrl(result?.data?.setup_url || '')
+      // Check if this is an existing user that needs authentication
+      const mode = result?.data?.mode
+      if (mode === 'existing_user_requires_auth') {
+        setSignupMode('existing_user_requires_auth')
+        setExistingUserReason(result?.data?.reason || 'An account with this email already exists.')
+        setError('')
+        setSuccess('This email is already registered. Please authenticate to create a new society.')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      } else {
+        // New user signup flow
+        setSignupMode('new_user_signup')
+        setSuccess('Society created in pending verification. Complete email and mobile verification to activate.')
+        setAssignedSetupUrl(result?.data?.setup_url || '')
 
-      if (result?.data?.verification?.email_token_debug) {
         setForm((prev) => ({
           ...prev,
-          email_token: result.data.verification.email_token_debug,
-          phone_otp: result.data.verification.otp_debug || prev.phone_otp,
+          email_token: '',
+          phone_otp: canAutoFillLocalOtp() ? (result?.data?.verification?.otp_debug || '') : '',
         }))
+
+        setStep(2)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAuthenticateExisting = async (event) => {
+    event.preventDefault()
+    setLoading(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      if (!existingUserPassword) {
+        throw new Error('Please enter your password.')
       }
 
+      const response = await apiPost('/public/society-signup/authenticate-existing', {
+        email: form.admin_email.trim().toLowerCase(),
+        password: existingUserPassword,
+      })
+
+      const token = response?.data?.token
+      if (!token) {
+        throw new Error('Authentication failed. Please try again.')
+      }
+
+      setExistingUserToken(token)
+      setSuccess('Authentication successful. Proceeding to create your society...')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      
+      // Auto-advance to society creation after brief delay to show success message
+      setTimeout(() => {
+        setSuccess('')
+        // The UI will now show the CreateSociety form
+      }, 1500)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCreateSociety = async (event) => {
+    event.preventDefault()
+    setLoading(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      if (!existingUserToken) {
+        throw new Error('Authentication token missing. Please authenticate first.')
+      }
+
+      // Note: Need to send token as Bearer in Authorization header for this endpoint
+      const response = await fetch(`${API_BASE}/public/society-signup/create-society`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${existingUserToken}`,
+        },
+        body: JSON.stringify({
+          plan_slug: form.plan_slug,
+          society_name: form.society_name.trim(),
+          workspace_slug: isCustomSlugEnabled ? normalizeWorkspaceSlug(customSlug) : null,
+          city: form.city.trim(),
+          state: form.state,
+          country: 'India',
+          unit_count: Number(form.unit_count),
+          recaptcha_token: await executeRecaptcha('create_society'),
+        }),
+      })
+
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        const message = extractApiErrorMessage(data, 'Failed to create society')
+        throw new Error(message)
+      }
+
+      setSuccess('Society created successfully! Verify your email to complete activation.')
+      setAssignedSetupUrl(data?.data?.setup_url || '')
+
+      setForm((prev) => ({
+        ...prev,
+        email_token: '',
+        phone_otp: canAutoFillLocalOtp() ? (data?.data?.verification?.otp_debug || '') : '',
+      }))
+
+      // Reset existing user flow state
+      setSignupMode('')
+      setExistingUserToken('')
+      setExistingUserPassword('')
+      setExistingUserReason('')
+
       setStep(2)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -491,11 +749,25 @@ export default function SocietySignupPage() {
     setError('')
 
     try {
+      const verificationToken = extractVerificationToken(form.email_token)
+      if (verificationToken.length < 20) {
+        throw new Error('Please paste the full email verification token or full verification link from your email.')
+      }
+
       await apiPost('/public/society-signup/verify-email', {
-        token: form.email_token,
+        token: verificationToken,
       })
+
+      if (verificationToken !== form.email_token) {
+        setForm((prev) => ({
+          ...prev,
+          email_token: verificationToken,
+        }))
+      }
+
       setSuccess('Email verified. Enter mobile OTP to complete account activation.')
       setStep(3)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -503,16 +775,80 @@ export default function SocietySignupPage() {
     }
   }
 
+  const handleUpdatePhone = async () => {
+    setLoading(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      const normalizedPhone = form.admin_phone.trim()
+
+      if (!/^[6-9][0-9]{9}$/.test(normalizedPhone)) {
+        throw new Error('Mobile number must be a valid 10-digit Indian number starting with 6-9.')
+      }
+
+      const response = await apiPost('/public/society-signup/update-phone', {
+        email: form.admin_email.trim().toLowerCase(),
+        phone: normalizedPhone,
+      })
+
+      setPhoneAlreadyVerified(false)
+
+      if (canAutoFillLocalOtp() && response?.data?.otp_debug) {
+        setForm((prev) => ({ ...prev, phone_otp: String(response.data.otp_debug) }))
+      } else {
+        setForm((prev) => ({ ...prev, phone_otp: '' }))
+      }
+
+      setSuccess('Mobile number updated. New OTP sent to your updated number.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+    const handleResendOtp = async () => {
+      setLoading(true)
+      setError('')
+      setSuccess('')
+
+      try {
+        const recaptchaToken = await executeRecaptcha('resend_otp')
+        const response = await apiPost('/public/society-signup/resend-phone', {
+          email: form.admin_email.trim().toLowerCase(),
+          recaptcha_token: recaptchaToken,
+        })
+
+        if (canAutoFillLocalOtp() && response?.data?.otp_debug) {
+          setForm((prev) => ({ ...prev, phone_otp: String(response.data.otp_debug) }))
+        }
+
+        setSuccess('New OTP sent successfully.')
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
   const handleVerifyPhoneAndComplete = async (event) => {
     event.preventDefault()
     setLoading(true)
     setError('')
 
     try {
-      await apiPost('/public/society-signup/verify-phone', {
+        const completionError = validateCompletionFields()
+        if (completionError) {
+          throw new Error(completionError)
+        }
+
+        if (!phoneAlreadyVerified) {
+          await apiPost('/public/society-signup/verify-phone', {
         email: form.admin_email,
         otp: form.phone_otp,
-      })
+          })
+        }
 
       const completion = await apiPost('/public/society-signup/complete', {
         email: form.admin_email,
@@ -520,7 +856,7 @@ export default function SocietySignupPage() {
         password_confirmation: form.password_confirmation,
       })
 
-      const redirectUrl = completion?.data?.redirect_url || `${APP_BASE}/auth/login`
+      const redirectUrl = completion?.data?.redirect_url || `${APP_BASE}/login`
       setSuccess('Account verified successfully. Redirecting to your setup workspace...')
       window.location.assign(redirectUrl)
     } catch (err) {
@@ -550,6 +886,12 @@ export default function SocietySignupPage() {
           ))}
         </div>
 
+          {isReentry && (
+            <p className="mb-4 rounded border border-primary-200 bg-primary-50 px-3 py-2 text-sm text-primary-700">
+              Resuming verification for <span className="font-semibold">{prefilledEmail}</span>
+            </p>
+          )}
+
         {error && <p className="mb-4 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         {success && (
           <div className="mb-4 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
@@ -572,7 +914,163 @@ export default function SocietySignupPage() {
           </div>
         )}
 
-        {step === 1 && (
+        {step === 1 && signupMode === 'existing_user_requires_auth' && !existingUserToken && (
+          <form onSubmit={handleAuthenticateExisting} className={cardClass}>
+            <h2 className="text-lg font-semibold text-primary-900">Authenticate to Create a New Society</h2>
+            <p className="text-sm text-primary-600">{existingUserReason}</p>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-primary-800">Email</label>
+              <input
+                className={`${fieldClass} bg-primary-50 text-primary-700`}
+                type="email"
+                value={form.admin_email.trim().toLowerCase()}
+                readOnly
+                disabled
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-primary-800">Password</label>
+              <input
+                className={fieldClass}
+                type="password"
+                placeholder="Enter your password"
+                value={existingUserPassword}
+                onChange={(e) => setExistingUserPassword(e.target.value)}
+                required
+                autoFocus
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                type="button"
+                className="flex-1 rounded-lg border border-primary-200 px-5 py-3 text-sm font-semibold text-primary-900 hover:bg-primary-50 disabled:opacity-60"
+                onClick={() => {
+                  setSignupMode('')
+                  setExistingUserPassword('')
+                  setError('')
+                  setSuccess('')
+                }}
+                disabled={loading}
+              >
+                Back
+              </button>
+              <button className={`${primaryButtonClass} flex-1`} disabled={loading} type="submit">
+                {loading ? 'Authenticating...' : 'Authenticate'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {step === 1 && signupMode === 'existing_user_requires_auth' && existingUserToken && (
+          <form onSubmit={handleCreateSociety} className={cardClass}>
+            <h2 className="text-lg font-semibold text-primary-900">Create Your New Society</h2>
+            <p className="text-sm text-primary-600">You're authenticated as <span className="font-semibold">{form.admin_email.trim().toLowerCase()}</span>. Now create your new society.</p>
+
+            <div className="space-y-1">
+              <label htmlFor="plan_slug" className="text-sm font-medium text-primary-800">Choose Your Plan</label>
+              <select
+                id="plan_slug"
+                className={fieldClass}
+                value={form.plan_slug}
+                onChange={handlePlanChange}
+                required
+              >
+                <option value="" disabled>Select a plan</option>
+                {Object.entries(planOptions).map(([slug, details]) => (
+                  <option key={slug} value={slug}>{details.label}</option>
+                ))}
+              </select>
+              {plansLoading ? <p className="text-xs text-primary-500">Loading plans...</p> : null}
+            </div>
+
+            {selectedPlanDetails ? (
+              <div className="rounded-xl border border-primary-200 bg-primary-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">Selected Plan</p>
+                <p className="mt-1 text-lg font-semibold text-primary-900">{selectedPlanDetails?.label}</p>
+                <p className="text-sm text-primary-700">{selectedPlanDetails?.pricing}</p>
+                <p className="text-sm text-primary-700">{selectedPlanDetails?.notes}</p>
+                <p className="text-sm text-primary-700">{selectedPlanDetails?.billing}</p>
+              </div>
+            ) : null}
+
+            <div className="space-y-1">
+              <label htmlFor="society_name_auth" className="text-sm font-medium text-primary-800">Society Name</label>
+              <input
+                id="society_name_auth"
+                className={fieldClass}
+                placeholder="e.g. Green Valley Residency"
+                value={form.society_name}
+                onChange={handleSocietyNameChange}
+                required
+              />
+              <p className="text-xs text-primary-600">Workspace preview: {slugPreview}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-primary-800">City</label>
+                <input
+                  className={fieldClass}
+                  placeholder="e.g. Hyderabad"
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-primary-800">State</label>
+                <input
+                  className={fieldClass}
+                  placeholder="e.g. Telangana"
+                  value={form.state}
+                  onChange={(e) => setForm({ ...form, state: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label htmlFor="unit_count_auth" className="text-sm font-medium text-primary-800">Number of Flats / Units</label>
+              <input
+                id="unit_count_auth"
+                className={fieldClass}
+                type="number"
+                min="1"
+                max="10000"
+                placeholder="e.g. 120"
+                value={form.unit_count}
+                onChange={handleUnitCountChange}
+                onBlur={handleUnitCountBlur}
+                required
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                type="button"
+                className="flex-1 rounded-lg border border-primary-200 px-5 py-3 text-sm font-semibold text-primary-900 hover:bg-primary-50 disabled:opacity-60"
+                onClick={() => {
+                  setExistingUserToken('')
+                  setExistingUserPassword('')
+                  setSignupMode('')
+                  setError('')
+                  setSuccess('')
+                }}
+                disabled={loading}
+              >
+                Back
+              </button>
+              <button className={`${primaryButtonClass} flex-1`} disabled={loading} type="submit">
+                {loading ? 'Creating...' : 'Create Society'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {step === 1 && (!signupMode || signupMode === 'new_user_signup') && (
           <form onSubmit={handleSignup} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Step 1: Signup Details</h2>
 
@@ -600,6 +1098,18 @@ export default function SocietySignupPage() {
                 <p className="text-sm text-primary-700">{selectedPlanDetails?.pricing}</p>
                 <p className="text-sm text-primary-700">{selectedPlanDetails?.notes}</p>
                 <p className="text-sm text-primary-700">{selectedPlanDetails?.billing}</p>
+                {monthlyEstimate ? (
+                  <div className="mt-2 rounded-lg border border-primary-200 bg-white px-3 py-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">Estimated Monthly Cost</p>
+                    <p className="text-base font-semibold text-primary-900">{formatCurrency(monthlyEstimate.total)}/month</p>
+                    <p className="text-xs text-primary-700">Estimated yearly cost: {formatCurrency(monthlyEstimate.total * 12)}/year</p>
+                    <p className="text-xs text-primary-600">
+                      {formatCurrency(monthlyEstimate.basePrice)} base + {formatCurrency(monthlyEstimate.perUnitPrice)} × {monthlyEstimate.units} units
+                    </p>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-xs text-primary-600">Enter a valid unit count to see estimated monthly cost.</p>
+                )}
               </div>
             ) : null}
 
@@ -790,8 +1300,9 @@ export default function SocietySignupPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-medium text-primary-800">Number of Flats / Units</label>
+              <label htmlFor="unit_count" className="text-sm font-medium text-primary-800">Number of Flats / Units</label>
               <input
+                id="unit_count"
                 className={fieldClass}
                 type="number"
                 min="1"
@@ -799,9 +1310,24 @@ export default function SocietySignupPage() {
                 step="1"
                 placeholder="e.g. 120"
                 value={form.unit_count}
-                onChange={(e) => setForm({ ...form, unit_count: e.target.value })}
+                onChange={handleUnitCountChange}
+                onBlur={handleUnitCountBlur}
                 required
               />
+              {selectedPlanDetails ? (
+                monthlyEstimate ? (
+                  <div className="space-y-1 text-xs text-primary-600">
+                    <p>
+                      Estimated monthly cost: <span className="font-semibold text-primary-800">{formatCurrency(monthlyEstimate.total)}/month</span>
+                    </p>
+                    <p>
+                      Estimated yearly cost: <span className="font-semibold text-primary-800">{formatCurrency(monthlyEstimate.total * 12)}/year</span>
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-xs text-primary-600">Enter a valid unit count to view monthly estimate.</p>
+                )
+              ) : null}
             </div>
 
             <div className="space-y-1">
@@ -843,44 +1369,7 @@ export default function SocietySignupPage() {
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-primary-800">Password</label>
-              <input
-                className={fieldClass}
-                type="password"
-                placeholder="Create password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                required
-              />
-              {passwordStrength && <p className="text-xs text-primary-600">Strength: {passwordStrength}</p>}
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-primary-800">Confirm Password</label>
-              <input
-                className={fieldClass}
-                type="password"
-                placeholder="Confirm password"
-                value={form.password_confirmation}
-                onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })}
-                required
-              />
-            </div>
-
-            <label className="flex items-start gap-2 text-sm text-primary-700">
-              <input
-                type="checkbox"
-                className="mt-1"
-                checked={form.terms_accepted}
-                onChange={(e) => setForm({ ...form, terms_accepted: e.target.checked })}
-              />
-              <span>
-                I agree to <Link href="/terms" className="underline">Terms of Service</Link> and <Link href="/privacy" className="underline">Privacy Policy</Link>
-              </span>
-            </label>
-
-            <button className={primaryButtonClass} disabled={loading} type="submit">
+             <button className={primaryButtonClass} disabled={loading} type="submit">
               {loading ? 'Creating...' : 'Create Society'}
             </button>
           </form>
@@ -889,10 +1378,10 @@ export default function SocietySignupPage() {
         {step === 2 && (
           <form onSubmit={handleVerifyEmail} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Step 2: Verify Email</h2>
-            <label className="text-sm text-primary-700">Email Verification Token</label>
+            <label className="text-sm text-primary-700">Email Verification Token or Link</label>
             <input
               className={fieldClass}
-              placeholder="Paste token from email"
+              placeholder="Paste token or full verification link from email"
               value={form.email_token}
               onChange={(e) => setForm({ ...form, email_token: e.target.value })}
               required
@@ -906,22 +1395,93 @@ export default function SocietySignupPage() {
         {step === 3 && (
           <form onSubmit={handleVerifyPhoneAndComplete} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Step 3: Verify Mobile and Activate</h2>
-            <label className="text-sm text-primary-700">Mobile OTP</label>
-            <input
-              className={fieldClass}
-              placeholder="Enter 6-digit OTP"
-              value={form.phone_otp}
-              onChange={(e) => setForm({ ...form, phone_otp: e.target.value.replace(/\D/g, '').slice(0, 6) })}
-              required
-            />
-            <button className={primaryButtonClass} disabled={loading} type="submit">
-              {loading ? 'Completing...' : 'Verify Mobile and Continue'}
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-primary-800">Mobile Number</label>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <div className="flex flex-1 items-center gap-2">
+                    <span className="rounded-lg border border-primary-200 bg-primary-50 px-3 py-3 text-sm font-medium text-primary-700">+91</span>
+                    <input
+                      className={fieldClass}
+                      type="tel"
+                      placeholder="9876543210"
+                      maxLength={10}
+                      value={form.admin_phone}
+                      onChange={(e) => setForm({ ...form, admin_phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                      required
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="rounded-lg border border-primary-200 px-4 py-3 text-sm font-semibold text-primary-900 hover:bg-primary-50 disabled:opacity-60"
+                    onClick={handleUpdatePhone}
+                    disabled={loading}
+                  >
+                    {loading ? 'Updating...' : 'Update Number'}
+                  </button>
+                </div>
+                <p className="text-xs text-primary-600">Use this if you need OTP on a different number.</p>
+              </div>
+
+              {!phoneAlreadyVerified && (
+                <div className="space-y-1">
+                  <label className="text-sm text-primary-700">Mobile OTP</label>
+                  <input
+                    className={fieldClass}
+                    placeholder="Enter 6-digit OTP"
+                    value={form.phone_otp}
+                    onChange={(e) => setForm({ ...form, phone_otp: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+                    required
+                  />
+                  <button type="button" className="text-xs font-semibold text-primary-800 underline underline-offset-2" onClick={handleResendOtp} disabled={loading}>Resend OTP</button>
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-primary-800">Password</label>
+                <input
+                  className={fieldClass}
+                  type="password"
+                  placeholder="Create password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  required
+                />
+                {passwordStrength && <p className="text-xs text-primary-600">Strength: {passwordStrength}</p>}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-primary-800">Confirm Password</label>
+                <input
+                  className={fieldClass}
+                  type="password"
+                  placeholder="Confirm password"
+                  value={form.password_confirmation}
+                  onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })}
+                  required
+                />
+              </div>
+
+              <label className="flex items-start gap-2 text-sm text-primary-700">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={form.terms_accepted}
+                  onChange={(e) => setForm({ ...form, terms_accepted: e.target.checked })}
+                />
+                <span>
+                  I agree to <Link href="/terms" target="_blank" className="underline">Terms of Service</Link> and <Link href="/privacy" target="_blank" className="underline">Privacy Policy</Link>
+                </span>
+              </label>
+
+              <button className={primaryButtonClass} disabled={loading} type="submit">
+                {loading ? 'Completing...' : 'Verify Mobile and Continue'}
             </button>
           </form>
         )}
 
         <p className="mt-6 text-center text-sm text-primary-600">
-          Already signed up? <Link href="/verify-account" className="font-semibold text-primary-800 underline">Verify your account here</Link>
+           Already signed up?{' '}<Link href="/signup" className="font-semibold text-primary-800 underline" onClick={(e) => { e.preventDefault(); const em = window.prompt('Enter your admin email to resume verification:'); if (em) window.location.assign(`/signup?email=${encodeURIComponent(em.trim())}`) }}>Resume verification</Link>
         </p>
       </div>
     </main>

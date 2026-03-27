@@ -10,6 +10,7 @@ function buildPublicPlansResponse() {
     success: true,
     data: [
       {
+        id: 'cd161563-54c7-48a8-8597-617409b199a4',
         slug: 'free',
         name: 'Free',
         display_name: 'Free',
@@ -19,6 +20,7 @@ function buildPublicPlansResponse() {
         trial_days: 30,
       },
       {
+        id: 'd4491691-ccd4-43d5-8e7b-a163bb524b81',
         slug: 'starter',
         name: 'Starter',
         display_name: 'Starter',
@@ -28,6 +30,7 @@ function buildPublicPlansResponse() {
         trial_days: 30,
       },
       {
+        id: '193daaa1-a465-4fce-a984-e1b4a253d03f',
         slug: 'essential',
         name: 'Essential',
         display_name: 'Essential',
@@ -37,6 +40,7 @@ function buildPublicPlansResponse() {
         trial_days: 30,
       },
       {
+        id: '2c945391-de1f-431d-a895-9e6b97d12bbe',
         slug: 'professional',
         name: 'Professional',
         display_name: 'Professional',
@@ -46,6 +50,7 @@ function buildPublicPlansResponse() {
         trial_days: 30,
       },
       {
+        id: 'f7f96d0b-30fe-4fc7-9ec4-b72fb2bcf86d',
         slug: 'enterprise',
         name: 'Enterprise',
         display_name: 'Enterprise',
@@ -125,6 +130,10 @@ jest.mock('../../lib/config', () => ({
 }))
 
 describe('SocietySignupPage', () => {
+  const waitForPlansLoad = async () => {
+    await screen.findByRole('option', { name: /starter/i }, { timeout: 5000 })
+  }
+
   beforeEach(() => {
     mockGet.mockReset()
     mockGet.mockReturnValue(null)
@@ -163,7 +172,7 @@ describe('SocietySignupPage', () => {
 
     render(<SocietySignupPage />)
 
-    await screen.findByRole('option', { name: /starter/i })
+    await waitForPlansLoad()
 
     const planSelect = screen.getByLabelText(/choose your plan/i)
 
@@ -172,9 +181,45 @@ describe('SocietySignupPage', () => {
     const selectedPlanCard = screen.getByText(/selected plan/i).closest('div')
 
     expect(selectedPlanCard).not.toBeNull()
-    expect(within(selectedPlanCard).getByText('Starter (v1)')).toBeInTheDocument()
+    expect(within(selectedPlanCard).getByText('Starter')).toBeInTheDocument()
     expect(within(selectedPlanCard).getByText('₹999/month base')).toBeInTheDocument()
+    expect(within(selectedPlanCard).getByText('₹1,999/month')).toBeInTheDocument()
+    expect(within(selectedPlanCard).getByText('Estimated yearly cost: ₹23,988/year')).toBeInTheDocument()
     expect(planSelect).toHaveValue('starter')
+  })
+
+  it('updates estimated monthly cost when unit count changes', async () => {
+    const user = userEvent.setup()
+
+    render(<SocietySignupPage />)
+
+    await waitForPlansLoad()
+
+    await user.selectOptions(screen.getByLabelText(/choose your plan/i), 'starter')
+
+    const unitInput = screen.getByLabelText(/number of flats \/ units/i)
+    await user.clear(unitInput)
+    await user.type(unitInput, '250')
+
+    expect(screen.getByText(/estimated monthly cost:/i)).toBeInTheDocument()
+    expect(screen.getAllByText('₹3,499/month').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('₹41,988/year').length).toBeGreaterThan(0)
+  })
+
+  it('allows clearing and retyping unit count in signup form', async () => {
+    const user = userEvent.setup()
+
+    render(<SocietySignupPage />)
+
+    await waitForPlansLoad()
+    await user.selectOptions(screen.getByLabelText(/choose your plan/i), 'starter')
+
+    const unitInput = screen.getByLabelText(/number of flats \/ units/i)
+    await user.clear(unitInput)
+    expect(unitInput).toHaveValue(null)
+
+    await user.type(unitInput, '114')
+    expect(unitInput).toHaveValue(114)
   })
 
   it('shows preselected plan details when arriving from pricing links', async () => {
@@ -182,20 +227,22 @@ describe('SocietySignupPage', () => {
 
     render(<SocietySignupPage />)
 
-    await screen.findByRole('option', { name: /essential/i })
+    await waitForPlansLoad()
 
     const selectedPlanCard = screen.getByText(/selected plan/i).closest('div')
 
     expect(screen.getByLabelText(/choose your plan/i)).toHaveValue('essential')
     expect(selectedPlanCard).not.toBeNull()
-    expect(within(selectedPlanCard).getByText('Essential (v1)')).toBeInTheDocument()
+    expect(within(selectedPlanCard).getByText('Essential')).toBeInTheDocument()
     expect(within(selectedPlanCard).getByText('₹1,999/month base')).toBeInTheDocument()
   })
 
-  it('does not allow enterprise as a self-serve signup option', () => {
+  it('does not allow enterprise as a self-serve signup option', async () => {
     mockGet.mockImplementation((key) => (key === 'plan' ? 'enterprise' : null))
 
     render(<SocietySignupPage />)
+
+    await waitForPlansLoad()
 
     const planSelect = screen.getByLabelText(/choose your plan/i)
 
@@ -209,6 +256,8 @@ describe('SocietySignupPage', () => {
     const user = userEvent.setup()
 
     render(<SocietySignupPage />)
+
+    await waitForPlansLoad()
 
     const societyNameInput = screen.getByLabelText(/society name/i)
 
@@ -224,6 +273,8 @@ describe('SocietySignupPage', () => {
 
     render(<SocietySignupPage />)
 
+    await waitForPlansLoad()
+
     const societyNameInput = screen.getByLabelText(/society name/i)
 
     await user.type(societyNameInput, 'Green Valley Residency')
@@ -237,6 +288,8 @@ describe('SocietySignupPage', () => {
     const user = userEvent.setup()
 
     render(<SocietySignupPage />)
+
+    await waitForPlansLoad()
 
     await user.click(screen.getByRole('button', { name: /edit workspace url/i }))
 
@@ -253,6 +306,8 @@ describe('SocietySignupPage', () => {
     const user = userEvent.setup()
 
     render(<SocietySignupPage />)
+
+    await waitForPlansLoad()
 
     await user.click(screen.getByRole('button', { name: /edit workspace url/i }))
 

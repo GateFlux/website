@@ -27,10 +27,10 @@ export const pricingPlans = [
     tagline: 'Best for small societies.',
     startingPrice: 999,
     basePrice: 999,
-    perUnitPrice: 10,
+    perUnitPrice: 8,
     priceNote: 'Final price depends on the number of units in your society.',
 
-    // ₹999 base + ₹10 per unit
+    // ₹999 base + ₹8 per unit
     perUnitNote: '+ per unit based on society size',
     recommendedFor: 'Up to 100 units',
     maxUnits: 100,
@@ -55,10 +55,10 @@ export const pricingPlans = [
     tagline: 'Ideal for growing residential communities.',
     startingPrice: 1999,
     basePrice: 1999,
-    perUnitPrice: 8,
+    perUnitPrice: 12,
     priceNote: 'Final monthly amount scales with your total units.',
 
-    // ₹1999 base + ₹8 per unit
+    // ₹1999 base + ₹12 per unit
     perUnitNote: '+ per unit based on society size',
     recommendedFor: '100-300 units',
     maxUnits: 300,
@@ -85,10 +85,10 @@ export const pricingPlans = [
     tagline: 'Advanced tools for large societies.',
     startingPrice: 3999,
     basePrice: 3999,
-    perUnitPrice: 6,
+    perUnitPrice: 18,
     priceNote: 'Built for larger societies with advanced operations needs.',
 
-    // ₹3999 base + ₹6 per unit
+    // ₹3999 base + ₹18 per unit
     perUnitNote: '+ per unit based on society size',
     recommendedFor: '301+ units',
     maxUnits: 1000,

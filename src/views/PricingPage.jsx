@@ -6,7 +6,6 @@ import {
   Check,
   Minus,
   ArrowRight,
-  Download,
   Calendar,
   Building2,
   Users,
@@ -83,13 +82,6 @@ function HeroSection() {
               <Calendar className="h-5 w-5" />
               Schedule Consultation
             </Link>
-            <a
-              href="/pricing-overview.pdf"
-              className="inline-flex items-center gap-2 text-white border border-white/20 px-6 py-3 rounded-lg font-medium hover:bg-white/5 transition-colors"
-            >
-              <Download className="h-5 w-5" />
-              Download Pricing Overview
-            </a>
           </div>
           
           <p className="text-sm text-primary-400">
@@ -888,36 +880,6 @@ function CTASection() {
   )
 }
 
-// Sticky CTA (fixed bottom)
-function StickyCTA() {
-  return (
-    <div className="fixed bottom-0 left-0 right-0 bg-primary-900 border-t border-primary-700 py-3 z-40 hidden md:block">
-      <Container>
-        <div className="flex items-center justify-between gap-4">
-          <p className="text-white text-sm">
-            Ready to discuss your community's infrastructure requirements?
-          </p>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/book-demo"
-              className="inline-flex items-center gap-2 bg-accent-500 text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-accent-600 transition-colors"
-            >
-              Schedule Consultation
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/signup?plan=starter"
-              className="inline-flex items-center gap-2 bg-primary-100 text-primary-900 px-5 py-2 rounded-lg font-semibold text-sm hover:bg-white transition-colors"
-            >
-              Start Free Trial
-            </Link>
-          </div>
-        </div>
-      </Container>
-    </div>
-  )
-}
-
 // Main Pricing Page
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState('monthly')
@@ -1014,9 +976,6 @@ export default function PricingPage() {
       <CommitmentSection />
       <FAQSection />
       <CTASection />
-      <StickyCTA />
-      {/* Add bottom padding for sticky CTA */}
-      <div className="h-16 md:block hidden" />
     </>
   )
 }

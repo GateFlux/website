@@ -5,7 +5,7 @@
 
 const config = {
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_GATEFLUX_API_BASE_URL || 'http://localhost:8000/api/v1',
+    baseUrl: process.env.NEXT_PUBLIC_GATEFLUX_API_BASE_URL || 'https://api.gateflux.co/api/v1',
   },
 
   app: {
