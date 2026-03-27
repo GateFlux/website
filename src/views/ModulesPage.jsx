@@ -132,6 +132,32 @@ const categories = [
     ],
   },
   {
+    id: 'resident-property',
+    icon: Building2,
+    title: 'Resident & Property',
+    color: 'bg-lime-50 text-lime-600',
+    modules: [
+      {
+        name: 'Resident Management',
+        description: 'Member onboarding, profile management, unit assignments, and invitation workflows.',
+        capabilities: ['Resident listing & profile view', 'Invitation & onboarding flow', 'Unit assignment & ownership', 'Member status management'],
+        platforms: ['web', 'api', 'mobile'],
+      },
+      {
+        name: 'Property & Unit Configuration',
+        description: 'Organize towers, blocks, floors, and units with customizable hierarchies and ownership tracking.',
+        capabilities: ['Block & floor structure setup', 'Unit CRUD & categorization', 'Ownership history tracking', 'Unit-wise dashboard view'],
+        platforms: ['web', 'api', 'mobile'],
+      },
+      {
+        name: 'Family & Household Members',
+        description: 'Manage household members per unit including family and domestic staff registrations.',
+        capabilities: ['Family member profiles', 'Domestic staff registration', 'Household listing per unit'],
+        platforms: ['api', 'mobile'],
+      },
+    ],
+  },
+  {
     id: 'gate',
     icon: Shield,
     title: 'Gate Operations',
@@ -147,7 +173,7 @@ const categories = [
         name: 'Vehicle Management',
         description: 'Member vehicle registration and guard-side verification for parking & entry control.',
         capabilities: ['Vehicle CRUD (member)', 'Vehicle verify & lookup (guard)', 'Parking integration support'],
-        platforms: ['web', 'api', 'mobile'],
+        platforms: ['api', 'mobile'],
       },
       {
         name: 'Blacklist Management',
@@ -193,6 +219,12 @@ const categories = [
         capabilities: ['Work order CRUD & vendor assignment', 'Status lifecycle management', 'Line items (materials + labor)', 'Auto-generate invoice from work order'],
         platforms: ['web', 'api'],
       },
+      {
+        name: 'Maintenance Management',
+        description: 'Scheduled and on-demand maintenance cycles with request tracking and billing integration.',
+        capabilities: ['Maintenance request CRUD', 'Cycle scheduling & tracking', 'Maintenance billing integration', 'Request status lifecycle'],
+        platforms: ['web', 'api'],
+      },
     ],
   },
   {
@@ -211,13 +243,13 @@ const categories = [
         name: 'Polls & Voting',
         description: 'Community polls with multiple options, voting, and real-time result tracking.',
         capabilities: ['Create / publish / close polls', 'Add/remove options', 'Cast & remove votes', 'Results view'],
-        platforms: ['web', 'api'],
+        platforms: ['web', 'api', 'mobile'],
       },
       {
         name: 'Events',
         description: 'Society events with RSVP management, calendar view, and attendance tracking.',
         capabilities: ['Create / publish / cancel / complete', 'RSVP & cancel RSVP', 'Calendar view & attendee list'],
-        platforms: ['web', 'api'],
+        platforms: ['web', 'api', 'mobile'],
       },
       {
         name: 'Emergency Broadcasts',
@@ -255,7 +287,7 @@ const categories = [
         name: 'Expense Management',
         description: 'Society expense tracking with categories, attachments, approval workflows, and reporting.',
         capabilities: ['Expense CRUD & categorization', 'Receipt attachments', 'Approval workflow', 'Expense analytics'],
-        platforms: ['web', 'api'],
+        platforms: ['api'],
       },
       {
         name: 'Fund Accounting',
@@ -281,19 +313,25 @@ const categories = [
         name: 'Staff Management',
         description: 'Society staff profiles with roles, shift assignments, and performance tracking.',
         capabilities: ['Staff CRUD & role assignment', 'Shift scheduling', 'Attendance tracking', 'Biometric attendance sync'],
-        platforms: ['web', 'api'],
+        platforms: ['web', 'api', 'mobile'],
       },
       {
         name: 'Payroll',
         description: 'Salary management with deductions, allowances, and payslip generation.',
         capabilities: ['Payroll CRUD & processing', 'Deductions & allowances', 'Payslip PDF generation'],
-        platforms: ['web', 'api'],
+        platforms: ['api'],
       },
       {
         name: 'Guard Device Management',
         description: 'Control which devices guards can use to log in, with per-user device listing and login history.',
         capabilities: ['Device registration / activate / deactivate', 'Per-user device listing', 'Guard login history'],
         platforms: ['api'],
+      },
+      {
+        name: 'Vendor Management',
+        description: 'Tenant-level vendor onboarding with contracts, visit passes, ratings, and performance analytics.',
+        capabilities: ['Vendor CRUD & onboarding', 'Contract management', 'Visit pass generation', 'Vendor ratings & analytics'],
+        platforms: ['web', 'api'],
       },
     ],
   },
@@ -313,7 +351,7 @@ const categories = [
         name: 'Asset Management',
         description: 'Track society assets with maintenance schedules, depreciation, and service history.',
         capabilities: ['Asset CRUD & categorization', 'Maintenance scheduling', 'Service history tracking'],
-        platforms: ['web', 'api'],
+        platforms: ['api'],
       },
     ],
   },
@@ -324,16 +362,22 @@ const categories = [
     color: 'bg-amber-50 text-amber-600',
     modules: [
       {
+        name: 'Committee Management',
+        description: 'Full committee lifecycle with roles, member assignments, permissions, and audit trails.',
+        capabilities: ['Committee CRUD & member assignment', 'Role & permission management', 'Committee audit trail', 'Member listing & history'],
+        platforms: ['web', 'api', 'mobile'],
+      },
+      {
         name: 'Board Meetings',
         description: 'Schedule and manage AGMs, committee meetings with agenda, minutes, and RSVP tracking.',
         capabilities: ['Meeting CRUD & scheduling', 'Agenda management', 'Minutes recording', 'RSVP & attendance'],
-        platforms: ['api'],
+        platforms: ['web', 'api'],
       },
       {
         name: 'Committee Elections',
         description: 'Digital elections with candidate nominations, voter eligibility, and secure ballot counting.',
         capabilities: ['Election CRUD & nomination period', 'Voter eligibility checks', 'Ballot casting & counting', 'Result declaration'],
-        platforms: ['api'],
+        platforms: ['web', 'api'],
       },
       {
         name: 'Document Repository',
@@ -353,7 +397,7 @@ const categories = [
         name: 'Operational Dashboard',
         description: 'Real-time overview of operations, access events, service requests, and financial health.',
         capabilities: ['Live access & gate metrics', 'Service request KPIs', 'Financial summary widgets', 'Recent activity feed'],
-        platforms: ['web', 'api'],
+        platforms: ['web', 'api', 'mobile'],
       },
       {
         name: 'Access Analytics',
@@ -385,7 +429,7 @@ const categories = [
         name: 'White-Label Branding',
         description: 'Fully customizable branding with your logo, colors, and custom domain.',
         capabilities: ['Custom logo & color scheme', 'Custom domain support', 'Branded email templates', 'White-label mobile apps'],
-        platforms: ['web', 'api'],
+        platforms: ['api'],
       },
       {
         name: 'Advanced Integrations',
@@ -403,7 +447,7 @@ const categories = [
         name: 'Multi-Property Management',
         description: 'Centralized dashboard for builders and property managers overseeing multiple communities.',
         capabilities: ['Portfolio dashboard across communities', 'Cross-property reporting', 'Tenant isolation & data boundaries', 'Centralized admin controls'],
-        platforms: ['web', 'api'],
+        platforms: ['api'],
       },
     ],
   },
@@ -415,14 +459,14 @@ const categories = [
     modules: [
       {
         name: 'Member App',
-        description: 'iOS & Android app for members to manage community updates, payments, service requests, and amenities.',
-        capabilities: ['Community feed & announcements', 'Maintenance billing & payments', 'Service requests', 'Amenity booking', 'Operational alerts'],
+        description: 'iOS & Android app for members to manage visitors, payments, complaints, amenities, community, and household.',
+        capabilities: ['Visitor pre-approval & tracking', 'Maintenance billing & payments', 'Service requests & complaints', 'Amenity & facility booking', 'Community feed, documents & committee', 'Family, vehicles & unit management', 'Notifications & emergency contacts'],
         platforms: ['mobile'],
       },
       {
         name: 'Security Guard App',
-        description: 'Dedicated gate app for access control, visitor check-ins, delivery handling, and shift operations.',
-        capabilities: ['Access verification', 'Manual entry', 'Check-in / check-out flow', 'Delivery handling', 'Shift handover support'],
+        description: 'Dedicated gate app for QR/OTP access verification, manual entry, visitor check-ins, and activity logging.',
+        capabilities: ['QR code & OTP scan verification', 'Manual visitor entry & logging', 'Visitor check-in / check-out', 'Gate activity logs & history', 'Visitor detail review', 'Profile & help access'],
         platforms: ['mobile'],
       },
     ],
@@ -455,7 +499,7 @@ const categories = [
         name: 'User Preferences & Help',
         description: 'Per-user preferences and in-app help center access for tenant users and admins.',
         capabilities: ['Personal preference management', 'In-app help and guidance', 'Role-aware access to support content'],
-        platforms: ['web'],
+        platforms: ['web', 'api'],
       },
     ],
   },
@@ -527,7 +571,8 @@ function HeroSection() {
           </h1>
           <p className="text-base md:text-lg text-primary-300 leading-relaxed mb-8 max-w-2xl mx-auto">
             Explore every module across operations, finance, governance, community,
-            infrastructure, and platform operations.
+            infrastructure, and platform operations. Current baseline: 57 modules
+            across 15 categories.
           </p>
           <Link
             href="/book-demo"

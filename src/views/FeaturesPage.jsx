@@ -119,10 +119,10 @@ function HeroSection() {
 // Quick Stats
 function QuickStats() {
   const stats = [
-    { icon: Shield, value: '20+', label: 'Tenant Admin Modules' },
-    { icon: Settings, value: '8+', label: 'Platform Console Tools' },
-    { icon: CreditCard, value: '15+', label: 'Finance & Billing Workflows' },
-    { icon: Smartphone, value: '3', label: 'Web + Mobile Surfaces' },
+    { icon: Shield, value: '57', label: 'Implemented Modules' },
+    { icon: Settings, value: '15', label: 'Module Categories' },
+    { icon: CreditCard, value: '5', label: 'Finance & Billing Modules' },
+    { icon: Smartphone, value: '4', label: 'Platform Surfaces' },
   ]
 
   return (
@@ -150,7 +150,7 @@ function VisitorSecuritySection() {
     {
       icon: UserCheck,
       title: 'Access Request Workflow',
-      description: 'Members can pre-authorize access requests with OTP verification before arrival.',
+      description: 'Residents can pre-authorize visitors with approval flows, OTP, and audit visibility before arrival.',
     },
     {
       icon: QrCode,
@@ -160,17 +160,17 @@ function VisitorSecuritySection() {
     {
       icon: Truck,
       title: 'Delivery Logging & History',
-      description: 'Track all deliveries from gate entry to handover with complete timestamped history.',
+      description: 'Track delivery and service visitor movement from gate entry to checkout with full timestamps.',
     },
     {
       icon: User,
       title: 'Domestic Help Registry',
-      description: 'Register domestic staff with role tagging, attendance tracking, and access schedules.',
+      description: 'Manage recurring visitors and domestic support profiles with schedule-based access.',
     },
     {
       icon: Car,
       title: 'Vehicle Access Management',
-      description: 'Monitor vehicle entries and exits with logging and parking management.',
+      description: 'Support resident vehicle registration plus guard verification and lookup workflows.',
     },
     {
       icon: AlertTriangle,
@@ -199,32 +199,32 @@ function CommunitySection() {
     {
       icon: Bell,
       title: 'Broadcast Announcements',
-      description: 'Send community-wide announcements with instant delivery and read receipts.',
+      description: 'Publish notices, announcements, and targeted communication with acknowledgment tracking.',
     },
     {
       icon: FileText,
       title: 'Smart Notice Board',
-      description: 'Digital notices with categorization, scheduling, and notification preferences.',
+      description: 'Operate a structured notice board with publish, archive, pin, expiry, and engagement controls.',
     },
     {
       icon: Calendar,
       title: 'Event Management',
-      description: 'Organize community events with RSVP tracking and calendar integration.',
+      description: 'Run event lifecycles with RSVP management, attendee visibility, and calendar views.',
     },
     {
       icon: MessageSquare,
       title: 'Service Requests Workflow',
-      description: 'Structured request management with assignment, escalation, and SLA monitoring.',
+      description: 'Handle service requests with assignment, SLA, escalation, attachments, and status tracking.',
     },
     {
       icon: Vote,
       title: 'Polls & Voting Modules',
-      description: 'Conduct community polls and elections with transparent, verifiable results.',
+      description: 'Run polls and committee election flows with voting and transparent result visibility.',
     },
     {
       icon: AlertTriangle,
       title: 'Emergency SOS Alerts',
-      description: 'One-tap emergency alerts that notify security and management instantly.',
+      description: 'Broadcast emergency alerts with panic-trigger support and member acknowledgment workflows.',
     },
   ]
 
@@ -249,32 +249,32 @@ function FinancialSection() {
     {
       icon: Receipt,
       title: 'Automated Maintenance Billing',
-      description: 'Automated billing with one-time and recurring charges, unit-wise calculations.',
+      description: 'Configure billing rules with recurring and one-time charge templates and late-fee controls.',
     },
     {
       icon: CreditCard,
       title: 'Online Payment Gateway',
-      description: 'Accept payments via UPI, cards, net banking with instant reconciliation.',
+      description: 'Collect payments through Razorpay and Stripe with receipts and status synchronization.',
     },
     {
       icon: FileText,
       title: 'Ledger View Per Flat',
-      description: 'Complete financial ledger for each unit with transaction history.',
+      description: 'Maintain unit-level ledger, invoice trails, and finance-ready transaction history.',
     },
     {
       icon: PiggyBank,
       title: 'Expense Entry Management',
-      description: 'Track all community expenses with categories, vendor mapping, and approvals.',
+      description: 'Track expenses with categories, attachments, approvals, and analytics reporting.',
     },
     {
       icon: BarChart3,
       title: 'Financial Summary Dashboard',
-      description: 'Comprehensive dashboard with income statements and downloadable reports.',
+      description: 'Surface finance dashboards with trial balance, statements, and operational summaries.',
     },
     {
       icon: ClipboardList,
       title: 'Audit-Ready Logs',
-      description: 'Complete audit trail of all financial transactions with timestamps.',
+      description: 'Preserve audit logs and exportable reports for finance and compliance operations.',
     },
   ]
 
@@ -338,7 +338,7 @@ function AdminControlSection() {
         <FeatureCategory
           icon={Settings}
           title="Society Administration & Governance"
-          description="Run governance and administration with role-aware controls, settings workspaces, and clear operational visibility."
+          description="Run administration with capability-based access, settings workspaces, provider controls, and governance operations."
           features={features}
           reversed={true}
         />
@@ -350,7 +350,7 @@ function AdminControlSection() {
 // Integration Section
 function IntegrationSection() {
   const integrations = [
-    { name: 'Payment Gateways', icon: CreditCard, description: 'Razorpay, PayU, Paytm' },
+    { name: 'Payment Gateways', icon: CreditCard, description: 'Razorpay, Stripe' },
     { name: 'SMS & WhatsApp', icon: MessageSquare, description: 'Automated notifications' },
     { name: 'Accounting', icon: FileText, description: 'Tally, Zoho Books' },
     { name: 'Access Control', icon: Key, description: 'RFID, Biometric systems' },
