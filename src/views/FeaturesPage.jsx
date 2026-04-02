@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import SignupLink from '../components/SignupLink'
 import {
   Shield,
   Users,
@@ -100,9 +101,9 @@ function HeroSection() {
             GateFlux brings security, finance, governance, and community management together in one modern system.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
-            <Link href="/signup?plan=starter" className="btn-primary px-6 py-3">
+            <SignupLink href="/signup?plan=starter" className="btn-primary px-6 py-3">
               Start Free Trial
-            </Link>
+            </SignupLink>
             <Link
               href="/book-demo"
               className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold border border-white/30 text-white hover:bg-white/10 transition-colors"
@@ -483,12 +484,12 @@ function CTASection() {
             See all these features in action. Book a personalized demo with our team.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
+            <SignupLink
               href="/signup?plan=starter"
               className="btn-primary-lg"
             >
               Start Free Trial
-            </Link>
+            </SignupLink>
             <Link
               href="/book-demo"
               className="btn-primary-lg group"

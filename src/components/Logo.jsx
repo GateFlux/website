@@ -11,6 +11,7 @@ export default function Logo({ variant = 'dark', className = '' }) {
         alt="GateFlux" 
         width={160}
         height={40}
+        style={{ width: 'auto', height: 'auto' }}
         priority
       />
     </div>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import SignupLink from '../components/SignupLink'
 import {
   Shield,
   Users,
@@ -56,13 +57,13 @@ function HeroSection() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link
+              <SignupLink
                 href="/signup"
                 className="btn-primary-lg"
               >
                 Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+              </SignupLink>
               <Link
                 href="/book-demo"
                 className="btn-outline px-8 py-4"
@@ -542,13 +543,13 @@ function CTASection() {
             GateFlux gives your committee one operating system for secure, accountable day-to-day operations.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
+            <SignupLink
               href="/signup"
               className="btn-primary-lg"
             >
               Start Free Trial
               <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
+            </SignupLink>
             <Link
               href="/book-demo"
               className="btn-outline px-8 py-4"

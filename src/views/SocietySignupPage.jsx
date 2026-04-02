@@ -5,6 +5,7 @@ import Script from 'next/script'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import config from '../lib/config'
+import usePlatformSettings from '../lib/usePlatformSettings'
 import { extractVerificationToken } from '../lib/verificationToken'
 
 const API_BASE = config.api.baseUrl
@@ -204,6 +205,8 @@ export default function SocietySignupPage() {
   const [stateSearch, setStateSearch] = useState('')
   const [planOptions, setPlanOptions] = useState({})
   const [plansLoading, setPlansLoading] = useState(true)
+  const { signupEnabled, maintenanceMode } = usePlatformSettings()
+  const signupDisabled = !signupEnabled
   const stateDropdownRef = useRef(null)
 
   // Existing user authentication flow state
@@ -579,6 +582,7 @@ export default function SocietySignupPage() {
 
   const handleSignup = async (event) => {
     event.preventDefault()
+    if (signupDisabled) return
     setLoading(true)
     setError('')
     setSuccess('')
@@ -886,6 +890,29 @@ export default function SocietySignupPage() {
           ))}
         </div>
 
+        {signupDisabled && (
+          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-6 py-8 text-center">
+            <h2 className="text-lg font-semibold text-amber-900">
+              {maintenanceMode ? 'Platform Under Maintenance' : 'Registration Currently Unavailable'}
+            </h2>
+            <p className="mt-2 text-sm text-amber-800">
+              {maintenanceMode
+                ? 'The platform is currently under maintenance. Please check back shortly.'
+                : 'Self-service society registration is temporarily disabled. Please contact us or book a demo to get started.'}
+            </p>
+            {!maintenanceMode && (
+              <div className="mt-4 flex justify-center gap-3">
+                <Link href="/contact" className="rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800">
+                  Contact Us
+                </Link>
+                <Link href="/book-demo" className="rounded-lg border border-primary-300 bg-white px-4 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50">
+                  Book a Demo
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
           {isReentry && (
             <p className="mb-4 rounded border border-primary-200 bg-primary-50 px-3 py-2 text-sm text-primary-700">
               Resuming verification for <span className="font-semibold">{prefilledEmail}</span>
@@ -914,7 +941,7 @@ export default function SocietySignupPage() {
           </div>
         )}
 
-        {step === 1 && signupMode === 'existing_user_requires_auth' && !existingUserToken && (
+        {!signupDisabled && step === 1 && signupMode === 'existing_user_requires_auth' && !existingUserToken && (
           <form onSubmit={handleAuthenticateExisting} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Authenticate to Create a New Society</h2>
             <p className="text-sm text-primary-600">{existingUserReason}</p>
@@ -964,7 +991,7 @@ export default function SocietySignupPage() {
           </form>
         )}
 
-        {step === 1 && signupMode === 'existing_user_requires_auth' && existingUserToken && (
+        {!signupDisabled && step === 1 && signupMode === 'existing_user_requires_auth' && existingUserToken && (
           <form onSubmit={handleCreateSociety} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Create Your New Society</h2>
             <p className="text-sm text-primary-600">You're authenticated as <span className="font-semibold">{form.admin_email.trim().toLowerCase()}</span>. Now create your new society.</p>
@@ -1070,7 +1097,7 @@ export default function SocietySignupPage() {
           </form>
         )}
 
-        {step === 1 && (!signupMode || signupMode === 'new_user_signup') && (
+        {!signupDisabled && step === 1 && (!signupMode || signupMode === 'new_user_signup') && (
           <form onSubmit={handleSignup} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Step 1: Signup Details</h2>
 
@@ -1375,7 +1402,7 @@ export default function SocietySignupPage() {
           </form>
         )}
 
-        {step === 2 && (
+        {!signupDisabled && step === 2 && (
           <form onSubmit={handleVerifyEmail} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Step 2: Verify Email</h2>
             <label className="text-sm text-primary-700">Email Verification Token or Link</label>
@@ -1392,7 +1419,7 @@ export default function SocietySignupPage() {
           </form>
         )}
 
-        {step === 3 && (
+        {!signupDisabled && step === 3 && (
           <form onSubmit={handleVerifyPhoneAndComplete} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Step 3: Verify Mobile and Activate</h2>
 
