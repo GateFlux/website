@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import usePlatformSettings from '../lib/usePlatformSettings'
 import {
   Check,
   Minus,
@@ -149,7 +150,7 @@ function PhilosophySection() {
 }
 
 // Plan Card Component
-function PlanCard({ plan, billingCycle, recommendedPlan, calculatorUsed }) {
+function PlanCard({ plan, billingCycle, recommendedPlan, calculatorUsed, signupEnabled }) {
   const Icon = PLAN_ICONS[plan.iconKey] || Building2
   const isEnterprise = plan.startingPrice === null
   const isFree = plan.slug === 'free'
@@ -160,7 +161,7 @@ function PlanCard({ plan, billingCycle, recommendedPlan, calculatorUsed }) {
     ? (billingCycle === 'yearly' ? plan.startingPrice * 0.85 : plan.startingPrice)
     : plan.startingPrice
   const billedYearly = displayMonthly ? displayMonthly * 12 : null
-  const signupHref = plan.slug === 'enterprise' ? '/book-demo' : `/signup?plan=${plan.slug}`
+  const signupHref = (plan.slug === 'enterprise' || !signupEnabled) ? '/book-demo' : `/signup?plan=${plan.slug}`
 
   return (
     <div
@@ -261,7 +262,7 @@ function PlanCard({ plan, billingCycle, recommendedPlan, calculatorUsed }) {
 }
 
 // Plans Section
-function PlansSection({ billingCycle, onBillingCycleChange, recommendedPlan, calculatorUsed, plansData }) {
+function PlansSection({ billingCycle, onBillingCycleChange, recommendedPlan, calculatorUsed, plansData, signupEnabled }) {
 
   return (
     <section className="section-padding bg-neutral-50">
@@ -306,6 +307,7 @@ function PlansSection({ billingCycle, onBillingCycleChange, recommendedPlan, cal
               billingCycle={billingCycle}
               recommendedPlan={recommendedPlan}
               calculatorUsed={calculatorUsed}
+              signupEnabled={signupEnabled}
             />
           ))}
         </div>
@@ -882,6 +884,7 @@ function CTASection() {
 
 // Main Pricing Page
 export default function PricingPage() {
+  const { signupEnabled } = usePlatformSettings()
   const [billingCycle, setBillingCycle] = useState('monthly')
   const [calculatorUsed, setCalculatorUsed] = useState(false)
   const [recommendedPlan, setRecommendedPlan] = useState(null)
@@ -967,6 +970,7 @@ export default function PricingPage() {
         recommendedPlan={recommendedPlan}
         calculatorUsed={calculatorUsed}
         plansData={plansData}
+        signupEnabled={signupEnabled}
       />
       <TrustIndicatorSection />
       <ExamplePricingSection onCalculatorChange={handleCalculatorChange} plansBySlug={plansBySlug} />

@@ -5,6 +5,7 @@ import Script from 'next/script'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import config from '../lib/config'
+import usePlatformSettings from '../lib/usePlatformSettings'
 import { extractVerificationToken } from '../lib/verificationToken'
 
 const API_BASE = config.api.baseUrl
@@ -204,6 +205,8 @@ export default function SocietySignupPage() {
   const [stateSearch, setStateSearch] = useState('')
   const [planOptions, setPlanOptions] = useState({})
   const [plansLoading, setPlansLoading] = useState(true)
+  const { signupEnabled, maintenanceMode } = usePlatformSettings()
+  const signupDisabled = !signupEnabled
   const stateDropdownRef = useRef(null)
 
   // Existing user authentication flow state
@@ -211,6 +214,16 @@ export default function SocietySignupPage() {
   const [existingUserToken, setExistingUserToken] = useState('')
   const [existingUserPassword, setExistingUserPassword] = useState('')
   const [existingUserReason, setExistingUserReason] = useState('')
+
+  // Resume verification modal state
+  const [showResumeModal, setShowResumeModal] = useState(false)
+  const [resumeEmail, setResumeEmail] = useState('')
+  const [resumeModalLoading, setResumeModalLoading] = useState(false)
+  const [resumeModalError, setResumeModalError] = useState('')
+  const [resumeModalActivated, setResumeModalActivated] = useState(false)
+
+  // Tracks whether a reentry user has valid pending signup (allows steps 2/3 even when signup is disabled)
+  const [validReentry, setValidReentry] = useState(false)
 
   const requestedPlan = useMemo(() => (searchParams.get('plan') || '').toLowerCase(), [searchParams])
   const isEnterpriseSignupRequested = requestedPlan === 'enterprise'
@@ -307,12 +320,26 @@ export default function SocietySignupPage() {
           })
           const statusData = response?.data || {}
 
+          if (!statusData.signup_found) {
+            setError('No pending signup found for this email. Please check the email address or start a new registration.')
+            return
+          }
+
+          if (statusData.user_activated) {
+            setError('')
+            setSuccess(`Your account is already active. Please log in to the platform to continue.`)
+            setAssignedSetupUrl(`${APP_BASE}/login`)
+            return
+          }
+
           if (canAutoFillLocalOtp() && statusData?.otp_debug) {
             setForm((prev) => ({
               ...prev,
               phone_otp: String(statusData.otp_debug),
             }))
           }
+
+          setValidReentry(true)
 
           if (statusData.phone_verified) {
             setPhoneAlreadyVerified(true)
@@ -326,6 +353,7 @@ export default function SocietySignupPage() {
             window.scrollTo({ top: 0, behavior: 'smooth' })
           }
         } catch (err) {
+          setValidReentry(false)
           setError('Could not load verification status. Please check your email or try again.')
         } finally {
           setLoading(false)
@@ -579,6 +607,7 @@ export default function SocietySignupPage() {
 
   const handleSignup = async (event) => {
     event.preventDefault()
+    if (signupDisabled) return
     setLoading(true)
     setError('')
     setSuccess('')
@@ -886,6 +915,29 @@ export default function SocietySignupPage() {
           ))}
         </div>
 
+        {signupDisabled && !validReentry && (
+          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-6 py-8 text-center">
+            <h2 className="text-lg font-semibold text-amber-900">
+              {maintenanceMode ? 'Platform Under Maintenance' : 'Registration Currently Unavailable'}
+            </h2>
+            <p className="mt-2 text-sm text-amber-800">
+              {maintenanceMode
+                ? 'The platform is currently under maintenance. Please check back shortly.'
+                : 'Self-service society registration is temporarily disabled. Please contact us or book a demo to get started.'}
+            </p>
+            {!maintenanceMode && (
+              <div className="mt-4 flex justify-center gap-3">
+                <Link href="/contact" className="rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800">
+                  Contact Us
+                </Link>
+                <Link href="/book-demo" className="rounded-lg border border-primary-300 bg-white px-4 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50">
+                  Book a Demo
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
           {isReentry && (
             <p className="mb-4 rounded border border-primary-200 bg-primary-50 px-3 py-2 text-sm text-primary-700">
               Resuming verification for <span className="font-semibold">{prefilledEmail}</span>
@@ -914,7 +966,7 @@ export default function SocietySignupPage() {
           </div>
         )}
 
-        {step === 1 && signupMode === 'existing_user_requires_auth' && !existingUserToken && (
+        {!signupDisabled && step === 1 && signupMode === 'existing_user_requires_auth' && !existingUserToken && (
           <form onSubmit={handleAuthenticateExisting} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Authenticate to Create a New Society</h2>
             <p className="text-sm text-primary-600">{existingUserReason}</p>
@@ -964,7 +1016,7 @@ export default function SocietySignupPage() {
           </form>
         )}
 
-        {step === 1 && signupMode === 'existing_user_requires_auth' && existingUserToken && (
+        {!signupDisabled && step === 1 && signupMode === 'existing_user_requires_auth' && existingUserToken && (
           <form onSubmit={handleCreateSociety} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Create Your New Society</h2>
             <p className="text-sm text-primary-600">You're authenticated as <span className="font-semibold">{form.admin_email.trim().toLowerCase()}</span>. Now create your new society.</p>
@@ -1070,7 +1122,7 @@ export default function SocietySignupPage() {
           </form>
         )}
 
-        {step === 1 && (!signupMode || signupMode === 'new_user_signup') && (
+        {!signupDisabled && step === 1 && (!signupMode || signupMode === 'new_user_signup') && (
           <form onSubmit={handleSignup} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Step 1: Signup Details</h2>
 
@@ -1375,7 +1427,7 @@ export default function SocietySignupPage() {
           </form>
         )}
 
-        {step === 2 && (
+        {(!signupDisabled || validReentry) && step === 2 && (
           <form onSubmit={handleVerifyEmail} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Step 2: Verify Email</h2>
             <label className="text-sm text-primary-700">Email Verification Token or Link</label>
@@ -1392,7 +1444,7 @@ export default function SocietySignupPage() {
           </form>
         )}
 
-        {step === 3 && (
+        {(!signupDisabled || validReentry) && step === 3 && (
           <form onSubmit={handleVerifyPhoneAndComplete} className={cardClass}>
             <h2 className="text-lg font-semibold text-primary-900">Step 3: Verify Mobile and Activate</h2>
 
@@ -1481,8 +1533,76 @@ export default function SocietySignupPage() {
         )}
 
         <p className="mt-6 text-center text-sm text-primary-600">
-           Already signed up?{' '}<Link href="/signup" className="font-semibold text-primary-800 underline" onClick={(e) => { e.preventDefault(); const em = window.prompt('Enter your admin email to resume verification:'); if (em) window.location.assign(`/signup?email=${encodeURIComponent(em.trim())}`) }}>Resume verification</Link>
+           Already signed up?{' '}<button type="button" className="font-semibold text-primary-800 underline underline-offset-2 hover:text-primary-900" onClick={() => { setResumeEmail(''); setResumeModalError(''); setResumeModalActivated(false); setShowResumeModal(true) }}>Resume verification</button>
         </p>
+
+        {/* Resume Verification Modal */}
+        {showResumeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowResumeModal(false)}>
+            <div className="relative mx-4 w-full max-w-md rounded-2xl border border-primary-200 bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+              <button type="button" className="absolute right-3 top-3 rounded-full p-1 text-primary-400 hover:bg-primary-100 hover:text-primary-700" onClick={() => setShowResumeModal(false)} aria-label="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+              </button>
+              <h3 className="mb-1 text-lg font-semibold text-primary-900">{resumeModalActivated ? 'Account Already Active' : 'Resume Verification'}</h3>
+              {resumeModalActivated ? (
+                <div>
+                  <p className="mb-4 text-sm text-primary-600">This email is already associated with an active account. Please log in to the platform to manage your society.</p>
+                  <div className="flex items-center justify-end gap-3">
+                    <button type="button" className="rounded-lg px-4 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50" onClick={() => setShowResumeModal(false)}>Close</button>
+                    <a href={`${APP_BASE}/login`} className="inline-flex rounded-lg bg-primary-800 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-900">Go to Login</a>
+                  </div>
+                </div>
+              ) : (
+                <>
+              <p className="mb-4 text-sm text-primary-600">Enter the admin email you used during signup to continue your verification.</p>
+              <form onSubmit={async (e) => {
+                e.preventDefault()
+                const trimmed = resumeEmail.trim().toLowerCase()
+                if (!trimmed) return
+                setResumeModalLoading(true)
+                setResumeModalError('')
+                try {
+                  const response = await apiPost('/public/society-signup/status', { email: trimmed })
+                  const statusData = response?.data || {}
+                  if (statusData.user_activated) {
+                    setResumeModalActivated(true)
+                    return
+                  }
+                  if (!statusData.signup_found) {
+                    setResumeModalError('No pending signup found for this email. Please check the email address and try again.')
+                    return
+                  }
+                  setShowResumeModal(false)
+                  window.location.assign(`/signup?email=${encodeURIComponent(trimmed)}`)
+                } catch (_err) {
+                  setResumeModalError('Could not verify this email. Please try again.')
+                } finally {
+                  setResumeModalLoading(false)
+                }
+              }}>
+                <input
+                  type="email"
+                  className="w-full rounded-lg border border-primary-200 bg-white px-4 py-3 text-sm text-primary-900 outline-none placeholder:text-primary-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-200"
+                  placeholder="your@email.com"
+                  value={resumeEmail}
+                  onChange={(e) => { setResumeEmail(e.target.value); setResumeModalError('') }}
+                  autoFocus
+                  required
+                  disabled={resumeModalLoading}
+                />
+                {resumeModalError && (
+                  <p className="mt-2 text-sm text-red-600">{resumeModalError}</p>
+                )}
+                <div className="mt-4 flex items-center justify-end gap-3">
+                  <button type="button" className="rounded-lg px-4 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50" onClick={() => setShowResumeModal(false)} disabled={resumeModalLoading}>Cancel</button>
+                  <button type="submit" className="rounded-lg bg-primary-800 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-900 disabled:opacity-60" disabled={!resumeEmail.trim() || resumeModalLoading}>{resumeModalLoading ? 'Checking...' : 'Continue'}</button>
+                </div>
+              </form>
+              </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   )

@@ -6,21 +6,25 @@ import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import Logo from './Logo'
 import Container from './Container'
+import SignupLink from './SignupLink'
+import usePlatformSettings from '../lib/usePlatformSettings'
 
-const navigation = [
+const baseNavigation = [
   { name: 'Features', href: '/features' },
   { name: 'Modules', href: '/modules' },
   { name: 'Security', href: '/security' },
   { name: 'Pricing', href: '/pricing' },
-  { name: 'Signup', href: '/signup' },
+  { name: 'Signup', href: '/signup', requiresSignup: true },
   { name: 'About', href: '/about' },
   { name: 'Contact', href: '/contact' },
 ]
 
 export default function Header() {
+  const { signupEnabled } = usePlatformSettings()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
+  const navigation = baseNavigation.filter((item) => !item.requiresSignup || signupEnabled)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -82,12 +86,13 @@ export default function Header() {
 
           {/* Desktop CTAs */}
           <div className="hidden lg:flex items-center gap-4">
-            <Link
+            <SignupLink
               href="/signup"
+              fallbackText="Book Demo"
               className="btn-primary"
             >
               Sign Up
-            </Link>
+            </SignupLink>
           </div>
 
           {/* Mobile Menu Button */}
@@ -126,12 +131,13 @@ export default function Header() {
               </Link>
             ))}
             <div className={`mt-4 pt-4 border-t ${mobilePanelClass}`}>
-              <Link
+              <SignupLink
                 href="/signup"
+                fallbackText="Book Demo"
                 className="btn-primary w-full text-center"
               >
                 Sign Up
-              </Link>
+              </SignupLink>
             </div>
           </div>
         </div>
