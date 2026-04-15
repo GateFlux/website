@@ -353,7 +353,7 @@ function IntegrationSection() {
   const integrations = [
     { name: 'Payment Gateways', icon: CreditCard, description: 'Razorpay, Stripe' },
     { name: 'SMS & WhatsApp', icon: MessageSquare, description: 'Automated notifications' },
-    { name: 'Accounting', icon: FileText, description: 'Tally, Zoho Books' },
+    { name: 'Accounting', icon: FileText, description: 'Tally' },
     { name: 'Access Control', icon: Key, description: 'RFID, Biometric systems' },
   ]
 

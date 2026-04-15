@@ -125,7 +125,7 @@ export const pricingPlans = [
       'Multi-society management',
       'Platform console and tenant operations',
       'White-label mobile apps',
-      'Custom integrations and SSO',
+      'Custom integrations',
       'Dedicated infrastructure',
       'SLA uptime guarantee',
       'Priority support and custom reporting',

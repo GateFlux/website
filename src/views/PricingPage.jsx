@@ -479,7 +479,6 @@ function ComparisonTableSection({ plansData }) {
         { label: 'SMS Notifications',                  values: [false, false, true, true, true] },
         { label: 'Two-Factor Authentication (2FA)',    values: [false, false, false, true, true] },
         { label: 'WhatsApp Notifications',             values: [false, false, false, true, true] },
-        { label: 'Single Sign-On (SSO)',               values: [false, false, false, false, true] },
       ],
     },
     {
