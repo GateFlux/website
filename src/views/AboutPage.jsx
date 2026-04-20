@@ -83,7 +83,7 @@ function StorySection() {
                   <p className="text-sm text-primary-600">Primary Market</p>
                 </div>
                 <div className="bg-white rounded-2xl p-6 shadow-soft text-center">
-                  <p className="text-4xl font-bold text-primary-900 mb-2">Beta</p>
+                  <p className="text-4xl font-bold text-primary-900 mb-2">Live</p>
                   <p className="text-sm text-primary-600">Current Stage</p>
                 </div>
               </div>

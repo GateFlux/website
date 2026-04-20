@@ -396,7 +396,7 @@ function MobileExperienceSection() {
   ]
 
   return (
-    <section className="section-padding bg-neutral-50">
+    <section id="mobile-apps" className="section-padding bg-neutral-50">
       <Container>
         <SectionHeader
           badge="Mobile Apps"
@@ -424,6 +424,18 @@ function MobileExperienceSection() {
                 </li>
               ))}
             </ul>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <a
+                href="/downloads/GateFlux-Resident.apk"
+                download
+                className="inline-block hover:opacity-80 transition-opacity"
+              >
+                <img src="/badges/google-play.svg" alt="Get it on Google Play" className="w-[140px] h-auto" />
+              </a>
+              <span className="inline-block opacity-35 cursor-default" title="Coming Soon">
+                <img src="/badges/app-store.svg" alt="App Store — Coming Soon" className="w-[140px] h-auto grayscale" />
+              </span>
+            </div>
           </div>
 
           {/* Security App */}
@@ -445,6 +457,18 @@ function MobileExperienceSection() {
                 </li>
               ))}
             </ul>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <a
+                href="/downloads/GateFlux-Security.apk"
+                download
+                className="inline-block hover:opacity-80 transition-opacity"
+              >
+                <img src="/badges/google-play.svg" alt="Get it on Google Play" className="w-[140px] h-auto" />
+              </a>
+              <span className="inline-block opacity-35 cursor-default" title="Coming Soon">
+                <img src="/badges/app-store.svg" alt="App Store — Coming Soon" className="w-[140px] h-auto grayscale" />
+              </span>
+            </div>
           </div>
         </div>
       </Container>
