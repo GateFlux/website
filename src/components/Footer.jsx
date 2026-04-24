@@ -20,6 +20,7 @@ const footerLinks = {
   resources: [
     { name: 'Documentation', href: 'https://docs.gateflux.co', external: true },
     { name: 'User Guides', href: '/user-guides' },
+    { name: 'Download Apps', href: '/#mobile-apps' },
     { name: 'Contact Support', href: '/contact' },
   ],
   legal: [
@@ -68,6 +69,18 @@ export default function Footer() {
                   <item.icon className="h-5 w-5" />
                 </a>
               ))}
+            </div>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <a
+                href="/downloads/GateFlux-Resident.apk"
+                download
+                className="inline-block hover:opacity-80 transition-opacity"
+              >
+                <img src="/badges/google-play.svg" alt="Get it on Google Play" className="w-[120px] h-auto" />
+              </a>
+              <span className="inline-block opacity-30 cursor-default" title="Coming Soon">
+                <img src="/badges/app-store.svg" alt="App Store — Coming Soon" className="w-[120px] h-auto grayscale" />
+              </span>
             </div>
           </div>
 
