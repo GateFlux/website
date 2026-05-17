@@ -192,6 +192,49 @@ The exported files can be deployed to any static hosting:
 - Firebase Hosting
 - GitHub Pages
 
+### Security Headers (Static Hosting)
+
+Because this project uses static export, production security headers are typically applied by your host/CDN (not by Next.js runtime middleware).
+
+- For hosts that support a `_headers` file (for example Netlify/Cloudflare-style adapters), this repo includes `public/_headers` and it will be copied into `build/_headers`.
+- For Nginx, add this to your TLS server block:
+
+```nginx
+add_header Strict-Transport-Security "max-age=15552000" always;
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()" always;
+```
+
+After deploy, verify with SecurityHeaders:
+
+```bash
+curl -I https://gateflux.co/
+```
+
+### Hostinger / Apache Deployment Note
+
+If your production response headers show `server: hcdn` and `platform: hostinger`, headers must be present at origin and then propagated through Hostinger CDN.
+
+- This repo now includes `public/.htaccess` with the required headers.
+- After `npm run build`, confirm `build/.htaccess` exists, and upload it to your production document root (same level as `index.html`).
+- In Hostinger hPanel, purge CDN cache after upload.
+
+Expected response after deploy:
+
+```bash
+curl -I https://gateflux.co/
+```
+
+Should include at least:
+
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains`
+- `X-Frame-Options: SAMEORIGIN`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()`
+
 ## Environment Variables
 
 Copy `.env.example` to `.env` and fill in values:
