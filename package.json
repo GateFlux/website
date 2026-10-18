@@ -2,9 +2,13 @@
   "name": "gateflux-website",
   "private": true,
   "version": "1.0.0",
+  "engines": {
+    "node": ">=22 <23",
+    "npm": ">=10"
+  },
   "scripts": {
     "predev": "node scripts/ensure-turbopack-cache.js",
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
