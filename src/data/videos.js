@@ -1,4 +1,4 @@
-// Fill these records only after approved uploads have been checked publicly.
+// User-provided upload IDs. Verify public playback before adding publication metadata.
 export const gatefluxVideos = {
   promotional: {
     youtubeId: '', title: 'GateFlux Product Overview',
@@ -6,7 +6,7 @@ export const gatefluxVideos = {
     poster: '/images/videos/gateflux-promo.webp',
   },
   walkthrough: {
-    youtubeId: '', title: 'GateFlux Application Walkthrough',
+    youtubeId: 'KB4blZK-zjo', title: 'GateFlux Application Walkthrough',
     description: 'Explore visitor pre-approval, complaint tracking, notices, invoice records and amenity reservations.',
     poster: '/images/videos/gateflux-demo.webp',
   },

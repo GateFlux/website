@@ -2,11 +2,13 @@ import Link from 'next/link'
 import Container from './Container'
 import SectionHeader from './SectionHeader'
 import VideoPlayer from './VideoPlayer'
-import { gatefluxVideos, videoStructuredData } from '../data/videos'
+import { gatefluxVideos, hasVideoId, videoStructuredData } from '../data/videos'
 import config from '../lib/config'
 
 export default function VideoShowcase({ walkthrough = false }) {
-  const video = walkthrough ? gatefluxVideos.walkthrough : gatefluxVideos.promotional
+  const video = walkthrough || !hasVideoId(gatefluxVideos.promotional)
+    ? gatefluxVideos.walkthrough
+    : gatefluxVideos.promotional
   const schema = videoStructuredData(video, config.website.baseUrl)
   return (
     <section id={walkthrough ? 'platform-walkthrough' : 'see-gateflux'} className="section-padding bg-neutral-50">
