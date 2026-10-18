@@ -4,6 +4,7 @@ const BASE_URL = 'https://gateflux.co'
 
 export default function sitemap() {
   return [
+    { url: `${BASE_URL}/demo`, changeFrequency: 'monthly', priority: 0.8 },
     {
       url: BASE_URL,
       lastModified: new Date(),

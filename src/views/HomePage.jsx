@@ -29,6 +29,7 @@ import SectionHeader from '../components/SectionHeader'
 import FeatureCard from '../components/FeatureCard'
 import ComparisonTable from '../components/ComparisonTable'
 import FAQ from '../components/FAQ'
+import VideoShowcase from '../components/VideoShowcase'
 
 // Hero Section
 function HeroSection() {
@@ -593,6 +594,7 @@ export default function HomePage() {
     <>
       <HeroSection />
       <TrustSection />
+      <VideoShowcase />
       <ProblemSection />
       <SolutionSection />
       <FeatureHighlightsSection />
