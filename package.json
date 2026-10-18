@@ -9,7 +9,7 @@
   "scripts": {
     "predev": "node scripts/ensure-turbopack-cache.js",
     "dev": "next dev --webpack",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
     "test": "jest",
