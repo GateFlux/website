@@ -1,16 +1,13 @@
+import { pageMetadata } from '../src/lib/seo'
 import HomePage from '../src/views/HomePage'
-import config from '../src/lib/config'
 
-export const metadata = {
+export const metadata = pageMetadata('/', {
   title: 'GateFlux | Smart Community Management Platform',
-  description: 'GateFlux unifies residents, security, and management into one intelligent, secure ecosystem. Visitor management, gate security, billing, maintenance and more — all in one platform.',
-  alternates: { canonical: `${config.website.baseUrl}/` },
+  description: 'GateFlux simplifies gated community management with visitor access control, maintenance payments, resident communication, and community administration.',
   openGraph: {
-    title: 'GateFlux | Smart Community Management Platform',
-    description: 'GateFlux unifies residents, security, and management into one intelligent, secure ecosystem.',
-    url: `${config.website.baseUrl}/`,
+    description: 'Simplify security, maintenance payments, resident communication, and community operations with GateFlux.',
   },
-}
+})
 
 export default function Home() {
   return <HomePage />

@@ -1,9 +1,10 @@
+import { pageMetadata } from '../../src/lib/seo'
 import TermsPage from '../../src/views/TermsPage'
 
-export const metadata = {
+export const metadata = pageMetadata('/terms', {
   title: 'Terms of Use — GateFlux',
   description: 'Terms and conditions governing access to and use of the GateFlux apartment management platform.',
-}
+})
 
 export default function Terms() {
   return <TermsPage />

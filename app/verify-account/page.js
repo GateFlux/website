@@ -1,11 +1,12 @@
+import { pageMetadata } from '../../src/lib/seo'
 import { Suspense } from 'react'
 import VerificationRedirectClient from '../../src/views/VerificationRedirectClient'
 
-export const metadata = {
+export const metadata = pageMetadata('/verify-account', {
   title: 'Verify Account — GateFlux',
   description: 'Resume verification for your GateFlux society signup.',
   robots: { index: false, follow: false },
-}
+})
 
 export default function VerifyAccountPage() {
   return (

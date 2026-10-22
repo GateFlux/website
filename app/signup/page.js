@@ -1,12 +1,11 @@
+import { pageMetadata } from '../../src/lib/seo'
 import { Suspense } from 'react'
 import SocietySignupPage from '../../src/views/SocietySignupPage'
-import config from '../../src/lib/config'
 
-export const metadata = {
+export const metadata = pageMetadata('/signup', {
   title: 'Sign Up — GateFlux',
   description: 'Create your society workspace or join an existing society on GateFlux.',
-  alternates: { canonical: `${config.website.baseUrl}/signup` },
-}
+})
 
 function SignupPageContent() {
   return <SocietySignupPage />

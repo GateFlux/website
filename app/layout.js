@@ -1,4 +1,5 @@
 import './globals.css'
+import { SITE_URL, siteStructuredData } from '../src/lib/seo'
 import Script from 'next/script'
 import { Inter } from 'next/font/google'
 import Header from '../src/components/Header'
@@ -17,25 +18,17 @@ export const viewport = {
 }
 
 export const metadata = {
-  title: 'GateFlux | Modern Infrastructure for Smarter Communities',
-  description: 'GateFlux unifies residents, security, and management into one intelligent, secure ecosystem. Enterprise-grade apartment and gated community management platform.',
-  keywords: 'apartment management, gated community, visitor management, security management, society management, housing society software, MyGate alternative, community management app',
-  authors: [{ name: 'GateFlux' }],
-  robots: 'index, follow',
-  openGraph: {
-    type: 'website',
-    url: 'https://gateflux.co/',
-    title: 'GateFlux | Modern Infrastructure for Smarter Communities',
-    description: 'GateFlux unifies residents, security, and management into one intelligent, secure ecosystem. Enterprise-grade apartment and gated community management platform.',
-    images: [{ url: 'https://gateflux.co/og-image.png' }],
-    siteName: 'GateFlux',
+  metadataBase: new URL(SITE_URL),
+  title: 'GateFlux',
+  icons: {
+    icon: [
+      { url: '/favicon/favicon.ico', type: 'image/x-icon' },
+      { url: '/favicon/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+      { url: '/favicon/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
+    ],
+    apple: [{ url: '/favicon/apple-icon-180x180.png', sizes: '180x180' }],
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'GateFlux | Modern Infrastructure for Smarter Communities',
-    description: 'GateFlux unifies residents, security, and management into one intelligent, secure ecosystem.',
-    images: ['https://gateflux.co/og-image.png'],
-  },
+  manifest: '/favicon/manifest.json',
 }
 
 export default function RootLayout({ children }) {
@@ -44,19 +37,6 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-        <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico?v=2" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png?v=2" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png?v=2" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon-180x180.png?v=2" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/favicon/apple-icon-152x152.png?v=2" />
-        <link rel="apple-touch-icon" sizes="144x144" href="/favicon/apple-icon-144x144.png?v=2" />
-        <link rel="apple-touch-icon" sizes="120x120" href="/favicon/apple-icon-120x120.png?v=2" />
-        <link rel="apple-touch-icon" sizes="114x114" href="/favicon/apple-icon-114x114.png?v=2" />
-        <link rel="apple-touch-icon" sizes="76x76" href="/favicon/apple-icon-76x76.png?v=2" />
-        <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png?v=2" />
-        <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png?v=2" />
-        <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png?v=2" />
-        <link rel="manifest" href="/favicon/manifest.json?v=2" />
         <meta name="msapplication-config" content="/favicon/browserconfig.xml" />
         <meta name="msapplication-TileColor" content="#1c153e" />
         <Script id="strip-heading-tag-attrs" strategy="beforeInteractive">
@@ -118,18 +98,7 @@ export default function RootLayout({ children }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "SoftwareApplication",
-              "name": "GateFlux",
-              "applicationCategory": "BusinessApplication",
-              "operatingSystem": "Web, iOS, Android",
-              "description": "Enterprise-grade apartment and gated community management platform",
-              "url": "https://gateflux.co",
-              "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" },
-              "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "ratingCount": "500" },
-              "provider": { "@type": "Organization", "name": "GateFlux", "url": "https://gateflux.co" }
-            })
+            __html: JSON.stringify(siteStructuredData).replace(/</g, '\\u003c')
           }}
         />
       </head>
