@@ -4,8 +4,8 @@ export const HOME_TITLE = 'GateFlux | Smart Community Management Platform'
 export const HOME_DESCRIPTION = 'GateFlux simplifies gated community management with visitor access control, maintenance payments, resident communication, and community administration.'
 export const SOCIAL_IMAGE = {
   url: `${SITE_URL}/images/gateflux-og.png`,
-  width: 1733,
-  height: 907,
+  width: 1200,
+  height: 630,
   type: 'image/png',
   alt: 'GateFlux Smart Community Management Platform',
 }

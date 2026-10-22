@@ -10,7 +10,7 @@ Homepage description: GateFlux simplifies gated community management with visito
 
 Homepage canonical: https://gateflux.co/; robots: index, follow.
 
-Every public page has its own title, description, canonical, Open Graph title/description/URL and Twitter card. Canonicals use trailing slashes to match the existing export configuration and production domain regardless of preview environment variables. All cards reference https://gateflux.co/images/gateflux-og.png with image alt text. Open Graph includes website type, GateFlux site name, en_IN locale, PNG type and actual 1733 x 907 image dimensions. Homepage OG and Twitter descriptions match the task exactly. Twitter uses summary_large_image; @gateflux comes from the existing Footer Twitter link.
+Every public page has its own title, description, canonical, Open Graph title/description/URL and Twitter card. Canonicals use trailing slashes to match the existing export configuration and production domain regardless of preview environment variables. All cards reference https://gateflux.co/images/gateflux-og.png with image alt text. Open Graph includes website type, GateFlux site name, en_IN locale, PNG type and 1200 x 630 image dimensions. Homepage OG and Twitter descriptions match the task exactly. Twitter uses summary_large_image; @gateflux comes from the existing Footer Twitter link.
 
 Organization and WebSite JSON-LD reference the public official /logo-dark.svg asset and consistent descriptions. Removed unverified SoftwareApplication rating, rating count and free-price offer. Existing demo video schema remains separate.
 
@@ -22,7 +22,7 @@ Kept app/sitemap.js as the only sitemap system, removed conflicting public/sitem
 
 ## Social image
 
-The user confirmed public/gateflux-og.png is the supplied social image. Copied it byte-for-byte to public/images/gateflux-og.png so the requested URL resolves. Original artwork is unchanged. The image is 1733 x 907, 649567 bytes; metadata reports these actual dimensions. This differs from the originally requested 1200 x 630 target. No resize or branding substitution was performed.
+The user supplied the replacement directly at public/images/gateflux-og.png. Verified its PNG dimensions are 1200 x 630 (1000094 bytes). Shared Open Graph metadata uses width 1200, height 630 and image/png. Twitter retains summary_large_image and the same image URL. Artwork was not resized, regenerated or modified.
 
 ## Validation
 
@@ -74,7 +74,11 @@ Organization/WebSite schemas do not guarantee a Google rich-result feature.
 - public/sitemap.xml
 - src/lib/seo.js (new shared metadata helper)
 - public/images/README.md (supplied image details)
-- public/images/gateflux-og.png (unchanged copy of supplied image)
+- public/images/gateflux-og.png (user-supplied 1200 x 630 replacement)
 - SEO-AUDIT.md (this report)
 
-public/gateflux-og.png was already untracked and was not modified.
+The replacement public/images/gateflux-og.png was already present when this update began and was not modified by the agent.
+
+## 1200 x 630 update validation
+
+Production build passed; all 6 test suites and 57 tests passed. Parsed initial exported HTML for all 16 sitemap pages: exactly one correct OG image URL, width 1200, height 630 and image/png tag, with unchanged Twitter card/image settings. Exported PNG matches the supplied file byte-for-byte and measures 1200 x 630. Existing static-export custom-header warning remains.

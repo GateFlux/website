@@ -1,1 +1,1 @@
-gateflux-og.png is an unchanged copy of the user-supplied public/gateflux-og.png. Dimensions: 1733 x 907. The requested target was 1200 x 630; the artwork has not been resized or altered. Open Graph dimensions reflect the supplied file.
+gateflux-og.png is the user-supplied 1200 x 630 PNG social image. Dimensions were verified from the PNG file. Artwork was not resized, regenerated or modified. Open Graph metadata uses these dimensions.
